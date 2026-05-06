@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Karan Gupta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background-color: #faf8f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8b6f47;
+            text-decoration: none;
+        }
+
+        nav a {
+            margin-left: 40px;
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #8b6f47;
+        }
+
+        /* Main Content */
+        .container {
+            padding: 80px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+            line-height: 1.2;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .about-text h2 {
+            font-size: 1.8rem;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .skills {
+            margin-top: 40px;
+        }
+
+        .skills h3 {
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background-color: #f0e8dc;
+            color: #8b6f47;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .about-sidebar {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .about-sidebar h3 {
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-item {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-label {
+            font-size: 0.85rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px;
+            text-align: center;
+            background-color: #f5ede0;
+            margin-top: 80px;
+        }
+
+        .footer-text {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                padding: 20px 30px;
+            }
+
+            nav a {
+                margin: 10px 0 0 0;
+            }
+
+            .container {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .about-text h2 {
+                font-size: 1.5rem;
+            }
+
+            .about-text p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html" class="logo">Welcome</a>
+        <div>
+            <a href="index.html">Work</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>About Me</h1>
+        
+        <div class="about-content">
+            <div class="about-text">
+                <h2>Who I Am</h2>
+                <p>
+                    I'm Karan Gupta, a passionate designer and developer with a keen eye for creating beautiful, functional digital experiences. With several years of experience in web design and development, I specialize in crafting interfaces that are both aesthetically pleasing and user-friendly.
+                </p>
+                <p>
+                    I believe that great design is about solving problems elegantly. Every project I undertake is approached with a deep understanding of user needs and business goals, ensuring that the final product delivers real value.
+                </p>
+                <p>
+                    When I'm not working on design projects, you'll find me exploring new design trends, experimenting with new technologies, or enjoying time with family and friends.
+                </p>
+
+                <div class="skills">
+                    <h3>Skills & Expertise</h3>
+                    <span class="skill-tag">UI/UX Design</span>
+                    <span class="skill-tag">Web Design</span>
+                    <span class="skill-tag">HTML/CSS</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">Responsive Design</span>
+                    <span class="skill-tag">User Research</span>
+                    <span class="skill-tag">Prototyping</span>
+                    <span class="skill-tag">Figma</span>
+                </div>
+            </div>
+
+            <div class="about-sidebar">
+                <h3>Quick Info</h3>
+                
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Location</div>
+                    <div class="sidebar-value">India</div>
+                </div>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Experience</div>
+                    <div class="sidebar-value">5+ Years</div>
+                </div>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Specialization</div>
+                    <div class="sidebar-value">Digital Design & Development</div>
+                </div>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Current Focus</div>
+                    <div class="sidebar-value">Building amazing web experiences</div>
+                </div>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Availability</div>
+                    <div class="sidebar-value">Open to new projects</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-text">© 2026. All rights reserved.</p>
+    </footer>
+</body>
+</html>
