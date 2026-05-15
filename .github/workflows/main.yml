@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Deploying the code to server
-    runs-on: self-hosted
+    runs-on: [self-hosted, tappydo]
 
     steps:
     - uses: actions/checkout@v2
