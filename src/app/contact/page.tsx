@@ -18,12 +18,26 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your form submission logic here
-    alert('Thanks for reaching out! I\'ll get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setStatus('sending');
+    try {
+      const res = await fetch('https://formspree.io/f/xnjyabev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    }
   };
 
   return (
@@ -112,10 +126,18 @@ export default function Contact() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition"
+                disabled={status === 'sending'}
+                className="w-full px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition disabled:opacity-60"
               >
-                Send Message
+                {status === 'sending' ? 'Sending...' : 'Send Message'}
               </button>
+
+              {status === 'success' && (
+                <p className="text-green-600 text-sm text-center font-medium">Message sent! I'll get back to you soon.</p>
+              )}
+              {status === 'error' && (
+                <p className="text-red-500 text-sm text-center">Something went wrong. Please try again.</p>
+              )}
             </form>
           </div>
 
@@ -153,7 +175,7 @@ export default function Contact() {
                 <a href="https://twitter.com" className="text-gray-600 hover:text-amber-700 text-2xl">
                   𝕏
                 </a>
-                <a href="https://linkedin.com" className="text-gray-600 hover:text-amber-700 text-2xl">
+                <a href="http://linkedin.com/in/karanguptak9" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-amber-700 text-2xl">
                   in
                 </a>
                 <a href="https://github.com" className="text-gray-600 hover:text-amber-700 text-2xl">
