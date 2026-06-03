@@ -5,41 +5,39 @@ import Image from 'next/image';
 export default function Home() {
   return (
     <div className="bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 py-20 sm:py-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div>
-            <div className="inline-block px-4 py-2 bg-amber-100 rounded-full mb-6">
-              <p className="text-sm font-semibold text-amber-800">Available for opportunities</p>
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-              Software Engineer focused on <span className="text-amber-700">Manufacturing & Production Reliability</span>
-            </h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg">
-              Sr. Application Support Engineer at Tesla with expertise in Python, SQL, ERP systems, and DevOps. Passionate about automation, system reliability, and solving complex manufacturing challenges through data-driven diagnostics and intelligent workflows.
-            </p>
-            <div className="flex gap-4">
-              <button className="px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition">
-                Get in Touch
-              </button>
-              <button className="px-8 py-3 border-2 border-amber-700 text-amber-700 rounded-lg font-semibold hover:bg-amber-50 transition">
-                View My Work
-              </button>
-            </div>
-          </div>
+      {/* Hero Section — full image then text below */}
+      <section className="w-full">
+        {/* Full image — natural aspect ratio, no cropping */}
+        <div className="w-full">
+          <Image
+            src="/ProfilePic.jpeg"
+            alt="Karan Gupta"
+            width={1920}
+            height={1200}
+            style={{ width: '100%', height: 'auto', maxHeight: '70vh', objectFit: 'cover', display: 'block' }}
+            priority
+          />
+        </div>
 
-          {/* Profile Photo */}
-          <div className="hidden md:flex items-center justify-center">
-            <div className="w-80 h-80 relative rounded-2xl overflow-hidden shadow-lg">
-              <Image
-                src="/ProfilePic.jpeg"
-                alt="Karan Gupta"
-                fill
-                style={{ objectFit: 'cover' }}
-                priority
-              />
-            </div>
+        {/* Text content below image */}
+        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
+          <div className="inline-block px-4 py-2 bg-amber-100 rounded-full mb-6">
+            <p className="text-sm font-semibold text-amber-800">Available for opportunities</p>
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+            Software Engineer focused on{' '}
+            <span className="text-amber-700">Manufacturing & Production Reliability</span>
+          </h1>
+          <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+            Sr. Application Support Engineer at Tesla with expertise in Python, SQL, ERP systems, and DevOps. Passionate about automation, system reliability, and solving complex manufacturing challenges through data-driven diagnostics and intelligent workflows.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button className="px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition">
+              Get in Touch
+            </button>
+            <button className="px-8 py-3 border-2 border-amber-700 text-amber-700 rounded-lg font-semibold hover:bg-amber-50 transition">
+              View My Work
+            </button>
           </div>
         </div>
       </section>
