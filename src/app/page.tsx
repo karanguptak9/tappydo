@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 export default function Home() {
   return (
     <div className="bg-gradient-to-b from-amber-50 to-white">
@@ -27,10 +29,16 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Image Placeholder */}
+          {/* Profile Photo */}
           <div className="hidden md:flex items-center justify-center">
-            <div className="w-80 h-80 bg-gradient-to-br from-amber-200 to-amber-100 rounded-2xl flex items-center justify-center">
-              <div className="text-8xl">👨‍💻</div>
+            <div className="w-80 h-80 relative rounded-2xl overflow-hidden shadow-lg">
+              <Image
+                src="/ProfilePic.jpeg"
+                alt="Karan Gupta"
+                fill
+                style={{ objectFit: 'cover' }}
+                priority
+              />
             </div>
           </div>
         </div>
