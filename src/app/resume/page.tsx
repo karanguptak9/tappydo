@@ -123,9 +123,13 @@ export default function Resume() {
 
         {/* Download Button */}
         <div className="mt-16 text-center">
-          <button className="px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition">
+          <a
+            href="/Karan Gupta Resume.pdf"
+            download="Karan Gupta Resume.pdf"
+            className="inline-block px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition"
+          >
             Download Full Resume
-          </button>
+          </a>
         </div>
       </div>
     </div>
