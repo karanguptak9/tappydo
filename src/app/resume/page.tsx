@@ -5,11 +5,20 @@ export default function Resume() {
     <div className="bg-gradient-to-b from-amber-50 to-white min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-20">
         {/* Header */}
-        <div className="mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">Resume</h1>
-          <p className="text-xl text-gray-600">
-            Experience, Education & Skills
-          </p>
+        <div className="mb-16 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
+          <div>
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">Resume</h1>
+            <p className="text-xl text-gray-600">
+              Experience, Education & Skills
+            </p>
+          </div>
+          <a
+            href="/Karan Gupta Resume.pdf"
+            download="Karan Gupta Resume.pdf"
+            className="inline-block px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition shrink-0"
+          >
+            Download Full Resume
+          </a>
         </div>
 
         {/* Experience Section */}
@@ -23,29 +32,36 @@ export default function Resume() {
                 title: "Sr. Application Support Engineer",
                 company: "Tesla, Inc.",
                 period: "Nov 2020 - Present",
-                description: "Built Python/SQL automation scripts and monitoring workflows for factory software systems, improving issue detection and reducing downtime by ~30%. Engineered observability workflows using Splunk, Grafana, and SolarWinds to accelerate root-cause analysis. Developed Claude Code-based custom skill/plugin to streamline application integration and reduce manual debugging effort by ~30%.",
+                description: "Built Python/SQL automation scripts and monitoring workflows for factory software systems, improving issue detection and reducing downtime by ~30%. Engineered observability workflows using Splunk, Grafana, and SolarWinds to accelerate root-cause analysis. Developed Claude Code-based custom skill/plugin to streamline application integration and reduce manual debugging effort by ~30%. Automated data validation, migration, and REST API-based workflows to improve data accuracy and operational speed across manufacturing systems.",
                 skills: ["Python", "SQL", "Splunk", "Grafana", "SolarWinds", "Kubernetes", "Docker"]
               },
               {
                 title: "Support Engineer",
                 company: "Inspyrus, Inc.",
                 period: "Sept 2018 - Nov 2020",
-                description: "Resolved technical and product issues for enterprise clients ensuring high satisfaction. Supported cloud operations and collaborated with engineering teams to optimize product capabilities. Implemented and optimized ERP systems, Oracle servers, and databases for scalability and reliability.",
+                description: "Resolved technical and product issues for enterprise clients ensuring high satisfaction. Supported cloud operations and collaborated with engineering teams to optimize product capabilities. Implemented and optimized ERP systems, Oracle servers, and tools such as Oracle WEC, WFR, WCC, and EM for scalability and reliability. Aligned technical work with business objectives to drive measurable improvements in client outcomes.",
                 skills: ["Oracle 11g/12c", "ERP Systems", "Cloud Operations", "MySQL"]
               },
               {
                 title: "Software Engineering Intern",
                 company: "Ernst & Young (EY)",
                 period: "Jun 2017 - Aug 2017",
-                description: "Developed data analysis algorithms and reformatted datasets to improve data accuracy and reporting quality. Gained hands-on experience with SAP ABAP while collaborating with Intex consultants on multiple projects.",
+                description: "Developed data analysis algorithms and reformatted datasets to improve data accuracy and reporting quality. Gained hands-on experience with SAP ABAP while collaborating with Intex consultants on multiple projects. Managed large datasets, populated databases, and extracted insights using MySQL to support data-driven decision-making.",
                 skills: ["SAP ABAP", "MySQL", "Data Analysis"]
               },
               {
                 title: "Website Developer",
                 company: "Henry Harvin India Education LLP",
                 period: "Jun 2016 - Aug 2016",
-                description: "Developed and deployed frontend web solutions using HTML, JavaScript, and CSS. Designed and implemented interactive features including chat interfaces and responsive page layouts.",
+                description: "Developed and deployed frontend web solutions using HTML, JavaScript, and CSS via GoDaddy hosting. Designed and implemented interactive features including chat interfaces and responsive page layouts. Managed backend database structures and email tracking systems using MySQL, ensuring data accuracy and reliable reporting.",
                 skills: ["HTML", "JavaScript", "CSS", "MySQL"]
+              },
+              {
+                title: "Software Engineering Intern",
+                company: "KPMG",
+                period: "Jul 2015 - Aug 2015",
+                description: "Integrated and structured large heterogeneous datasets, designing specialized database schemas to improve data organization and query efficiency. Conducted statistical analysis and developed reusable Python scripts to automate processing and derive actionable insights. Applied findings from both primary and secondary data sources to support strategic business decisions.",
+                skills: ["Python", "MySQL", "Data Analysis", "Statistical Analysis"]
               }
             ].map((job, index) => (
               <div key={index} className="border-l-4 border-amber-700 pl-6">
@@ -121,16 +137,6 @@ export default function Resume() {
           </div>
         </section>
 
-        {/* Download Button */}
-        <div className="mt-16 text-center">
-          <a
-            href="/Karan Gupta Resume.pdf"
-            download="Karan Gupta Resume.pdf"
-            className="inline-block px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition"
-          >
-            Download Full Resume
-          </a>
-        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import FlightMap from '@/components/FlightMap';
 
 export default function Home() {
   return (
@@ -49,11 +50,14 @@ export default function Home() {
           <div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">My Journey</h3>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Currently serving as Sr. Application Support Engineer at Tesla, where I've built Python/SQL automation scripts and monitoring workflows that improved issue detection and reduced downtime by ~30%. My experience spans manufacturing systems, ERP platforms, cloud operations, and DevOps.
+              I grew up in Delhi, India and made the move to San Francisco to pursue my passion for technology. I earned my B.S. in Computer Science from San Francisco State University, then built my career at Inspyrus before joining Tesla as a Sr. Application Support Engineer — where I've built Python/SQL automation workflows that improved issue detection and reduced downtime by ~30%.
             </p>
-            <p className="text-gray-600 leading-relaxed">
-              I hold a B.S. in Computer Science from San Francisco State University and am pursuing an Evening MBA from Santa Clara University. I'm passionate about leveraging AI, IoT, and automation to solve manufacturing challenges and drive operational excellence.
+            <p className="text-gray-600 leading-relaxed mb-6">
+              I'm currently pursuing an Evening MBA at Santa Clara University and am passionate about leveraging AI, IoT, and automation to solve complex manufacturing challenges. Outside of work, you'll find me on the pickleball court or tending to my kitchen garden — I love growing my own vegetables at home.
             </p>
+
+            {/* Journey Map */}
+            <FlightMap />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">What I Do</h3>
@@ -77,6 +81,41 @@ export default function Home() {
                 <div>
                   <h4 className="font-semibold text-gray-900">Data & Analytics</h4>
                   <p className="text-sm text-gray-600">SQL queries, data validation, root-cause analysis</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-2xl">☁️</span>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Cloud Operations</h4>
+                  <p className="text-sm text-gray-600">Incident response, root-cause analysis, system observability</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-2xl">🔌</span>
+                <div>
+                  <h4 className="font-semibold text-gray-900">API Integration</h4>
+                  <p className="text-sm text-gray-600">REST APIs, Postman, data validation, backend troubleshooting</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-2xl">🔬</span>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Research & Innovation</h4>
+                  <p className="text-sm text-gray-600">Predictive maintenance, AI/IoT in manufacturing, battery technology</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-2xl">💼</span>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Business Strategy</h4>
+                  <p className="text-sm text-gray-600">MBA-backed perspective on aligning tech with business objectives</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-2xl">🗂️</span>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Technical Leadership</h4>
+                  <p className="text-sm text-gray-600">Playbooks, escalation protocols, onboarding frameworks</p>
                 </div>
               </li>
             </ul>
@@ -105,9 +144,9 @@ export default function Home() {
         <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
           I'm always interested in hearing about new projects and opportunities.
         </p>
-        <button className="px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition">
+        <a href="/contact" className="inline-block px-8 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition">
           Start a Conversation
-        </button>
+        </a>
       </section>
     </div>
   );
