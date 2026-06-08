@@ -1,7 +1,8 @@
 'use client';
 
 export default function Projects() {
-  const projects = [
+  type Project = { title: string; description: string; image: string; tags: string[]; link: string; cta?: string };
+  const projects: Project[] = [
     {
       title: "Manufacturing Automation Framework",
       description: "Python/SQL automation scripts for factory software systems. Improved issue detection and reduced downtime by ~30% through data-driven diagnostics.",
@@ -43,6 +44,14 @@ export default function Projects() {
       image: "📋",
       tags: ["Kubernetes", "Docker", "Cloud", "Documentation"],
       link: "#"
+    },
+    {
+      title: "Todo App",
+      description: "A simple productivity app to organize tasks. Full features coming soon.",
+      image: "✅",
+      tags: ["Next.js", "React", "TypeScript", "Productivity"],
+      link: "/projects/todo",
+      cta: "Open App"
     }
   ];
 
@@ -91,10 +100,18 @@ export default function Projects() {
                   ))}
                 </div>
 
-                {/* Learn More */}
-                <div className="mt-4 text-amber-700 font-semibold text-sm group-hover:translate-x-2 transition-transform">
-                  Learn more →
-                </div>
+                {/* CTA */}
+                {project.cta ? (
+                  <div className="mt-4">
+                    <span className="inline-block px-4 py-2 bg-amber-700 text-white text-sm font-semibold rounded-lg group-hover:bg-amber-800 transition">
+                      {project.cta} →
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-4 text-amber-700 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                    Learn more →
+                  </div>
+                )}
               </div>
             </a>
           ))}
