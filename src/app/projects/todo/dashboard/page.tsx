@@ -67,12 +67,20 @@ export default function DashboardPage() {
           <span className="text-xl font-bold text-amber-700">T</span>
           <span className="font-semibold text-gray-800">Tappydo Dashboard</span>
         </div>
-        <Link
-          href="/projects/todo"
-          className="text-sm bg-amber-700 text-white px-4 py-1.5 rounded-lg font-medium hover:bg-amber-800 transition"
-        >
-          + Add Task
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/projects/todo/tasks"
+            className="text-sm border border-amber-700 text-amber-700 px-4 py-1.5 rounded-lg font-medium hover:bg-amber-50 transition"
+          >
+            All Tasks
+          </Link>
+          <Link
+            href="/projects/todo"
+            className="text-sm bg-amber-700 text-white px-4 py-1.5 rounded-lg font-medium hover:bg-amber-800 transition"
+          >
+            + Add Task
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">

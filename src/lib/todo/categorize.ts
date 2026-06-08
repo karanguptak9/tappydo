@@ -36,42 +36,124 @@ const KEYWORDS: Record<Exclude<Category, 'Assign me'>, string[]> = {
     'urgent', 'asap', 'now', 'today', 'tonight', 'immediately', 'deadline',
     'due', 'critical', 'emergency', 'rush', 'eod', 'end of day', 'overdue',
     'must', 'priority', 'important', 'this morning', 'this afternoon',
+    'last minute', 'right away', 'cannot wait', 'time sensitive', 'expiring',
+    'expires', 'final notice', 'late', 'past due', 'by tonight', 'by today',
+    'before eod', 'need to', 'have to', 'got to', 'running out',
   ],
   Health: [
+    // Exercise
     'workout', 'gym', 'exercise', 'run', 'jog', 'walk', 'yoga', 'stretch',
-    'doctor', 'dentist', 'appointment', 'medicine', 'pill', 'medication',
-    'diet', 'eat', 'sleep', 'rest', 'therapy', 'mental health', 'weight',
-    'steps', 'protein', 'vitamin', 'water', 'hydrate', 'physio', 'clinic',
-    'hospital', 'health', 'pickleball', 'sport',
+    'swim', 'cycling', 'bike', 'hike', 'hiking', 'cardio', 'lift', 'weights',
+    'crossfit', 'pilates', 'zumba', 'dance', 'tennis', 'pickleball', 'sport',
+    'sports', 'training', 'athletic', 'fitness', 'steps', 'calories',
+    // Medical
+    'doctor', 'dentist', 'therapist', 'psychologist', 'psychiatrist',
+    'appointment', 'checkup', 'check up', 'physical', 'blood test', 'lab',
+    'prescription', 'medicine', 'pill', 'medication', 'pharmacy', 'clinic',
+    'hospital', 'surgery', 'vaccine', 'vaccination', 'flu shot', 'physio',
+    'chiropractor', 'optometrist', 'glasses', 'contacts',
+    // Wellness
+    'diet', 'nutrition', 'meal prep', 'healthy', 'sleep', 'rest', 'nap',
+    'therapy', 'mental health', 'meditation', 'mindfulness', 'detox',
+    'weight', 'bmi', 'protein', 'vitamin', 'supplement', 'water', 'hydrate',
+    'self care', 'wellness', 'skincare', 'spa', 'massage', 'health',
   ],
   Finance: [
-    'pay', 'bill', 'payment', 'rent', 'mortgage', 'loan', 'bank', 'money',
-    'invest', 'investment', 'budget', 'tax', 'insurance', 'credit', 'debit',
-    'salary', 'expense', 'savings', 'transfer', 'wire', 'refund', 'receipt',
-    'invoice', 'cost', 'price', 'fee', 'subscription', 'dollar', 'finance',
-    'stock', '401k', 'ira', 'venmo', 'zelle', 'paypal',
+    // Payments
+    'pay', 'bill', 'payment', 'rent', 'mortgage', 'loan', 'emi', 'dues',
+    'transfer', 'wire', 'send money', 'venmo', 'zelle', 'paypal', 'cashapp',
+    'refund', 'reimburse', 'reimbursement', 'charge', 'fee',
+    // Banking & accounts
+    'bank', 'account', 'credit card', 'debit card', 'credit', 'debit',
+    'checking', 'savings', 'direct deposit', 'overdraft', 'balance',
+    // Investing
+    'invest', 'investment', 'stock', 'stocks', 'etf', 'mutual fund',
+    '401k', 'ira', 'roth', 'portfolio', 'dividend', 'crypto', 'bitcoin',
+    'brokerage', 'trading', 'equity', 'bonds', 'retirement',
+    // Budgeting & taxes
+    'budget', 'budgeting', 'expense', 'spending', 'track expenses', 'tax',
+    'taxes', 'tax return', 'filing', 'irs', 'w2', '1099', 'audit',
+    'receipt', 'invoice', 'quote', 'estimate',
+    // Insurance & misc
+    'insurance', 'premium', 'deductible', 'claim', 'policy', 'salary',
+    'paycheck', 'raise', 'bonus', 'commission', 'income', 'revenue',
+    'profit', 'loss', 'money', 'cash', 'dollar', 'finance', 'financial',
+    'cost', 'price', 'subscription', 'cancel subscription',
   ],
   Learning: [
-    'read', 'book', 'course', 'study', 'learn', 'research', 'tutorial',
-    'article', 'class', 'lecture', 'skill', 'practice', 'watch', 'podcast',
-    'video', 'chapter', 'notes', 'review', 'exam', 'quiz', 'certificate',
-    'degree', 'training', 'workshop', 'webinar', 'documentation', 'docs',
-    'language', 'coding', 'programming',
+    // Reading
+    'read', 'book', 'ebook', 'audiobook', 'article', 'blog post', 'paper',
+    'journal', 'newsletter', 'chapter', 'page',
+    // Courses & education
+    'course', 'class', 'lecture', 'lesson', 'module', 'curriculum',
+    'degree', 'certificate', 'certification', 'diploma', 'exam', 'quiz',
+    'test', 'assignment', 'homework', 'essay', 'thesis',
+    // Skills
+    'study', 'learn', 'practice', 'drill', 'memorize', 'skill', 'skills',
+    'language', 'coding', 'programming', 'python', 'javascript', 'sql',
+    'react', 'swift', 'java', 'data science', 'machine learning', 'ai',
+    // Media & resources
+    'tutorial', 'video', 'youtube', 'podcast', 'webinar', 'workshop',
+    'conference', 'seminar', 'talk', 'notes', 'flashcard', 'anki',
+    'documentation', 'docs', 'guide', 'manual',
+    // Research
+    'research', 'investigate', 'explore', 'look up', 'google', 'find out',
+    'understand', 'training', 'upskill', 'improve', 'develop',
   ],
   Ideas: [
-    'idea', 'think', 'consider', 'maybe', 'could', 'what if', 'brainstorm',
-    'concept', 'explore', 'draft', 'sketch', 'plan', 'propose', 'imagine',
-    'create', 'build', 'design', 'start', 'try', 'experiment', 'prototype',
-    'new', 'feature', 'project', 'side project', 'startup', 'blog', 'write',
-    'post', 'content',
+    // Ideation
+    'idea', 'ideas', 'brainstorm', 'concept', 'concept', 'notion', 'thought',
+    'imagine', 'envision', 'what if', 'how about', 'what about',
+    // Planning
+    'think', 'consider', 'explore', 'evaluate', 'assess', 'propose',
+    'suggest', 'recommend', 'maybe', 'could', 'should we', 'might',
+    // Creation
+    'draft', 'sketch', 'mockup', 'wireframe', 'prototype', 'experiment',
+    'test idea', 'try', 'attempt', 'create', 'build', 'design', 'make',
+    // Projects
+    'project', 'side project', 'startup', 'venture', 'initiative',
+    'feature', 'product', 'mvp', 'launch', 'ship', 'release',
+    // Content
+    'write', 'blog', 'post', 'article', 'newsletter', 'content', 'script',
+    'pitch', 'proposal', 'plan', 'strategy', 'roadmap', 'vision',
   ],
   Personal: [
-    'family', 'mom', 'dad', 'sister', 'brother', 'friend', 'call', 'text',
-    'email', 'meet', 'visit', 'trip', 'travel', 'flight', 'hotel', 'vacation',
-    'gift', 'birthday', 'anniversary', 'wedding', 'party', 'dinner', 'lunch',
-    'grocery', 'groceries', 'shopping', 'buy', 'errand', 'pick up', 'drop off',
-    'clean', 'laundry', 'dishes', 'kitchen garden', 'garden', 'plant',
-    'haircut', 'chores', 'home', 'house', 'car', 'dmv', 'passport',
+    // People
+    'family', 'mom', 'dad', 'mother', 'father', 'sister', 'brother',
+    'wife', 'husband', 'partner', 'spouse', 'girlfriend', 'boyfriend',
+    'kids', 'child', 'children', 'baby', 'son', 'daughter', 'toddler',
+    'nephew', 'niece', 'cousin', 'grandma', 'grandpa', 'grandmother',
+    'grandfather', 'aunt', 'uncle', 'in-laws', 'neighbor', 'relative',
+    'friend', 'bestie', 'colleague', 'roommate',
+    // Communication
+    'call', 'phone call', 'text', 'message', 'chat', 'email', 'dm',
+    'catch up', 'reach out', 'check in', 'follow up', 'reply', 'respond',
+    'meet', 'visit', 'hang out', 'get together', 'date night',
+    // Travel & events
+    'trip', 'travel', 'flight', 'airport', 'hotel', 'airbnb', 'book flight',
+    'vacation', 'holiday', 'staycation', 'road trip', 'weekend',
+    'birthday', 'anniversary', 'wedding', 'engagement', 'baby shower',
+    'graduation', 'party', 'event', 'gathering', 'reunion', 'celebration',
+    'christmas', 'thanksgiving', 'new year', 'diwali', 'eid', 'hanukkah',
+    // Food & home
+    'dinner', 'lunch', 'breakfast', 'brunch', 'coffee', 'cook', 'meal',
+    'recipe', 'restaurant', 'reservation', 'takeout', 'order food',
+    'grocery', 'groceries', 'supermarket', 'shopping', 'buy', 'purchase',
+    'errand', 'pick up', 'drop off', 'deliver', 'send',
+    'clean', 'cleaning', 'laundry', 'dishes', 'vacuum', 'mop', 'declutter',
+    'organize', 'tidy', 'chores', 'kitchen garden', 'garden', 'plant',
+    'home', 'house', 'apartment', 'condo', 'move', 'moving', 'repair',
+    'fix', 'maintenance', 'plumber', 'electrician', 'handyman',
+    // Personal admin
+    'haircut', 'salon', 'barber', 'manicure', 'pedicure',
+    'car', 'oil change', 'dmv', 'registration', 'passport', 'visa',
+    'license', 'id', 'social security', 'insurance', 'renew',
+    'delivery', 'package', 'amazon', 'order', 'return', 'exchange',
+    'clothes', 'outfit', 'shoes', 'wardrobe', 'donate', 'charity',
+    // Leisure
+    'movie', 'film', 'concert', 'show', 'theater', 'museum', 'gallery',
+    'game', 'sports game', 'hobby', 'fun', 'relax', 'unwind', 'leisure',
+    'pet', 'dog', 'cat', 'vet', 'grooming', 'walk the dog', 'personal',
   ],
 };
 
