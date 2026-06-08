@@ -4,6 +4,14 @@ export default function Projects() {
   type Project = { title: string; description: string; image: string; tags: string[]; link: string; cta?: string };
   const projects: Project[] = [
     {
+      title: "Todo App",
+      description: "A smart task manager that automatically categorizes your tasks using keyword detection. Built with Next.js, React, and Supabase.",
+      image: "✅",
+      tags: ["Next.js", "React", "TypeScript", "Supabase"],
+      link: "/projects/todo",
+      cta: "Open App"
+    },
+    {
       title: "Manufacturing Automation Framework",
       description: "Python/SQL automation scripts for factory software systems. Improved issue detection and reduced downtime by ~30% through data-driven diagnostics.",
       image: "🏭",
@@ -45,14 +53,6 @@ export default function Projects() {
       tags: ["Kubernetes", "Docker", "Cloud", "Documentation"],
       link: "#"
     },
-    {
-      title: "Todo App",
-      description: "A simple productivity app to organize tasks. Full features coming soon.",
-      image: "✅",
-      tags: ["Next.js", "React", "TypeScript", "Productivity"],
-      link: "/projects/todo",
-      cta: "Open App"
-    }
   ];
 
   return (
