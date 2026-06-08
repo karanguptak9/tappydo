@@ -7,25 +7,35 @@ import { addTask } from '@/lib/todo/storage';
 
 export default function TodoInputPage() {
   const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [lastCategory, setLastCategory] = useState<Category | null>(null);
   const [lastTicket, setLastTicket] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const predicted = text.trim().length > 2 ? categorizeTask(text) : null;
   const colors = predicted ? getCategoryColors(predicted) : null;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    const category = categorizeTask(trimmed);
-    const task = addTask({ text: trimmed, category, done: false });
-    setLastCategory(category);
-    setLastTicket(task.ticketId);
-    setText('');
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 2500);
+    setSubmitting(true);
+    setError(null);
+    try {
+      const category = categorizeTask(trimmed);
+      const task = await addTask({ text: trimmed, category, done: false });
+      setLastCategory(category);
+      setLastTicket(task.ticketId);
+      setText('');
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 2500);
+    } catch {
+      setError('Failed to save task. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -70,6 +80,7 @@ export default function TodoInputPage() {
                 placeholder="e.g. Pay credit card bill, Read 20 pages, Call mom..."
                 className="w-full text-lg px-6 py-5 rounded-2xl border-2 border-amber-200 focus:border-amber-500 focus:outline-none bg-white shadow-md placeholder:text-gray-300 text-gray-800 transition"
                 autoFocus
+                disabled={submitting}
               />
               {predicted && colors && (
                 <div className={`absolute right-4 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full text-xs font-semibold border ${colors.bg} ${colors.text} ${colors.border} transition-all`}>
@@ -80,10 +91,10 @@ export default function TodoInputPage() {
 
             <button
               type="submit"
-              disabled={!text.trim()}
+              disabled={!text.trim() || submitting}
               className="w-full py-4 bg-amber-700 text-white text-base font-semibold rounded-2xl hover:bg-amber-800 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
             >
-              Add Task
+              {submitting ? 'Saving...' : 'Add Task'}
             </button>
           </form>
 
@@ -91,6 +102,12 @@ export default function TodoInputPage() {
             <div className={`mt-4 px-5 py-3 rounded-xl border text-sm font-medium flex items-center gap-2 ${getCategoryColors(lastCategory).bg} ${getCategoryColors(lastCategory).text} ${getCategoryColors(lastCategory).border}`}>
               <span>✓</span>
               <span><strong>{lastTicket}</strong> added to <strong>{lastCategory}</strong></span>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 px-5 py-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm">
+              {error}
             </div>
           )}
         </div>

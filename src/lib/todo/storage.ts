@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 import { Category } from './categorize';
 
 export type Task = {
@@ -9,53 +10,78 @@ export type Task = {
   createdAt: string;
 };
 
-const STORAGE_KEY = 'tappydo_tasks';
+type DbRow = {
+  id: string;
+  ticket_id: string;
+  text: string;
+  category: string;
+  done: boolean;
+  created_at: string;
+};
 
-export function loadTasks(): Task[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Task[]) : [];
-  } catch {
-    return [];
-  }
+function toTask(row: DbRow): Task {
+  return {
+    id: row.id,
+    ticketId: row.ticket_id,
+    text: row.text,
+    category: row.category as Category,
+    done: row.done,
+    createdAt: row.created_at,
+  };
 }
 
-export function saveTasks(tasks: Task[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+export async function loadTasks(): Promise<Task[]> {
+  const { data, error } = await supabase
+    .from('todo')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data as DbRow[]).map(toTask);
 }
 
-function nextTicketId(tasks: Task[]): string {
-  const max = tasks.reduce((acc, t) => {
-    const n = parseInt(t.ticketId?.replace('T-', '') ?? '0', 10);
+async function nextTicketId(): Promise<string> {
+  const { data } = await supabase
+    .from('todo')
+    .select('ticket_id')
+    .order('created_at', { ascending: false });
+
+  const max = (data ?? []).reduce((acc: number, row: { ticket_id: string }) => {
+    const n = parseInt(row.ticket_id?.replace('T-', '') ?? '0', 10);
     return n > acc ? n : acc;
   }, 0);
+
   return `T-${String(max + 1).padStart(2, '0')}`;
 }
 
-export function addTask(task: Omit<Task, 'id' | 'ticketId' | 'createdAt'>): Task {
-  const tasks = loadTasks();
-  const newTask: Task = {
-    ...task,
-    id: crypto.randomUUID(),
-    ticketId: nextTicketId(tasks),
-    createdAt: new Date().toISOString(),
-  };
-  saveTasks([newTask, ...tasks]);
-  return newTask;
+export async function addTask(task: Omit<Task, 'id' | 'ticketId' | 'createdAt'>): Promise<Task> {
+  const ticketId = await nextTicketId();
+
+  const { data, error } = await supabase
+    .from('todo')
+    .insert({ ticket_id: ticketId, text: task.text, category: task.category, done: task.done })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return toTask(data as DbRow);
 }
 
-export function toggleTask(id: string): void {
-  const tasks = loadTasks();
-  saveTasks(tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+export async function toggleTask(id: string, currentDone: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('todo')
+    .update({ done: !currentDone })
+    .eq('id', id);
+
+  if (error) throw error;
 }
 
-export function deleteTask(id: string): void {
-  saveTasks(loadTasks().filter((t) => t.id !== id));
+export async function deleteTask(id: string): Promise<void> {
+  const { error } = await supabase.from('todo').delete().eq('id', id);
+  if (error) throw error;
 }
 
-export function updateTaskCategory(id: string, category: Category): void {
-  const tasks = loadTasks();
-  saveTasks(tasks.map((t) => (t.id === id ? { ...t, category } : t)));
+export async function updateTaskCategory(id: string, category: Category): Promise<void> {
+  const { error } = await supabase.from('todo').update({ category }).eq('id', id);
+  if (error) throw error;
 }
