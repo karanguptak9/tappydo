@@ -33,8 +33,10 @@ export default function TodoInputPage() {
       setText('');
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 2500);
-    } catch {
-      setError('Failed to save task. Please try again.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : JSON.stringify(err);
+      setError(`Failed to save task: ${msg}`);
+      console.error('addTask error:', err);
     } finally {
       setSubmitting(false);
     }
