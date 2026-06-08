@@ -4,7 +4,7 @@ export default function Projects() {
   type Project = { title: string; description: string; image: string; tags: string[]; link: string; cta?: string };
   const projects: Project[] = [
     {
-      title: "Todo App",
+      title: "Automated Task Manager",
       description: "A smart task manager that automatically categorizes your tasks using keyword detection. Built with Next.js, React, and Supabase.",
       image: "✅",
       tags: ["Next.js", "React", "TypeScript", "Supabase"],

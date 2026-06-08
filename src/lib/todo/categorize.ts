@@ -75,16 +75,23 @@ const KEYWORDS: Record<Exclude<Category, 'Assign me'>, string[]> = {
   ],
 };
 
+function matchesKeyword(text: string, kw: string): boolean {
+  // Multi-word phrases: exact substring match
+  if (kw.includes(' ')) return text.includes(kw);
+  // Single words: match on word boundary so "idea" doesn't match inside "ideal"
+  return new RegExp(`\\b${kw}\\b`).test(text);
+}
+
 export function categorizeTask(text: string): Category {
   const lower = text.toLowerCase();
 
   // Check Urgent first — it overrides everything
-  if (KEYWORDS.Urgent.some((kw) => lower.includes(kw))) return 'Urgent';
+  if (KEYWORDS.Urgent.some((kw) => matchesKeyword(lower, kw))) return 'Urgent';
 
   const scores: Partial<Record<Category, number>> = {};
 
   for (const [cat, keywords] of Object.entries(KEYWORDS) as [Exclude<Category, 'Assign me'>, string[]][]) {
-    const matches = keywords.filter((kw) => lower.includes(kw)).length;
+    const matches = keywords.filter((kw) => matchesKeyword(lower, kw)).length;
     if (matches > 0) scores[cat] = matches;
   }
 
