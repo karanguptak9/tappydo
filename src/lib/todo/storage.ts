@@ -2,6 +2,7 @@ import { Category } from './categorize';
 
 export type Task = {
   id: string;
+  ticketId: string;
   text: string;
   category: Category;
   done: boolean;
@@ -25,11 +26,20 @@ export function saveTasks(tasks: Task[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-export function addTask(task: Omit<Task, 'id' | 'createdAt'>): Task {
+function nextTicketId(tasks: Task[]): string {
+  const max = tasks.reduce((acc, t) => {
+    const n = parseInt(t.ticketId?.replace('T-', '') ?? '0', 10);
+    return n > acc ? n : acc;
+  }, 0);
+  return `T-${String(max + 1).padStart(2, '0')}`;
+}
+
+export function addTask(task: Omit<Task, 'id' | 'ticketId' | 'createdAt'>): Task {
   const tasks = loadTasks();
   const newTask: Task = {
     ...task,
     id: crypto.randomUUID(),
+    ticketId: nextTicketId(tasks),
     createdAt: new Date().toISOString(),
   };
   saveTasks([newTask, ...tasks]);

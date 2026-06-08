@@ -9,6 +9,7 @@ export default function TodoInputPage() {
   const [text, setText] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [lastCategory, setLastCategory] = useState<Category | null>(null);
+  const [lastTicket, setLastTicket] = useState<string | null>(null);
 
   const predicted = text.trim().length > 2 ? categorizeTask(text) : null;
   const colors = predicted ? getCategoryColors(predicted) : null;
@@ -19,8 +20,9 @@ export default function TodoInputPage() {
     if (!trimmed) return;
 
     const category = categorizeTask(trimmed);
-    addTask({ text: trimmed, category, done: false });
+    const task = addTask({ text: trimmed, category, done: false });
     setLastCategory(category);
+    setLastTicket(task.ticketId);
     setText('');
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 2500);
@@ -85,10 +87,10 @@ export default function TodoInputPage() {
             </button>
           </form>
 
-          {submitted && lastCategory && (
+          {submitted && lastCategory && lastTicket && (
             <div className={`mt-4 px-5 py-3 rounded-xl border text-sm font-medium flex items-center gap-2 ${getCategoryColors(lastCategory).bg} ${getCategoryColors(lastCategory).text} ${getCategoryColors(lastCategory).border}`}>
               <span>✓</span>
-              <span>Task added to <strong>{lastCategory}</strong></span>
+              <span><strong>{lastTicket}</strong> added to <strong>{lastCategory}</strong></span>
             </div>
           )}
         </div>

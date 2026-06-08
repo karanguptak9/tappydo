@@ -108,6 +108,7 @@ export default function DashboardPage() {
                               onClick={() => handleToggle(task.id)}
                               className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 transition ${task.done ? `${c.dot} border-transparent` : 'border-gray-300 hover:border-gray-400'}`}
                             />
+                            <span className="text-xs font-mono text-gray-400 shrink-0">{task.ticketId}</span>
                             <span className={`text-xs flex-1 leading-snug ${task.done ? 'line-through text-gray-400' : 'text-gray-600'}`}>
                               {task.text}
                             </span>
@@ -186,6 +187,7 @@ export default function DashboardPage() {
                             onClick={() => handleToggle(task.id)}
                             className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 transition ${task.done ? `${c.dot} border-transparent` : 'border-gray-300 hover:border-gray-400'}`}
                           />
+                          <span className={`text-xs font-mono shrink-0 ${task.done ? 'text-gray-300' : 'text-gray-400'}`}>{task.ticketId}</span>
                           <span className={`text-sm flex-1 leading-snug ${task.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>
                             {task.text}
                           </span>
