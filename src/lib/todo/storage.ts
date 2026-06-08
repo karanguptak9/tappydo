@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { Category } from './categorize';
 
 export type Task = {
@@ -31,7 +31,7 @@ function toTask(row: DbRow): Task {
 }
 
 export async function loadTasks(): Promise<Task[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('todo')
     .select('*')
     .order('created_at', { ascending: false });
@@ -41,7 +41,7 @@ export async function loadTasks(): Promise<Task[]> {
 }
 
 async function nextTicketId(): Promise<string> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('todo')
     .select('ticket_id')
     .order('created_at', { ascending: false });
@@ -57,7 +57,7 @@ async function nextTicketId(): Promise<string> {
 export async function addTask(task: Omit<Task, 'id' | 'ticketId' | 'createdAt'>): Promise<Task> {
   const ticketId = await nextTicketId();
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('todo')
     .insert({ ticket_id: ticketId, text: task.text, category: task.category, done: task.done })
     .select()
@@ -68,7 +68,7 @@ export async function addTask(task: Omit<Task, 'id' | 'ticketId' | 'createdAt'>)
 }
 
 export async function toggleTask(id: string, currentDone: boolean): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('todo')
     .update({ done: !currentDone })
     .eq('id', id);
@@ -77,11 +77,11 @@ export async function toggleTask(id: string, currentDone: boolean): Promise<void
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  const { error } = await supabase.from('todo').delete().eq('id', id);
+  const { error } = await getSupabase().from('todo').delete().eq('id', id);
   if (error) throw error;
 }
 
 export async function updateTaskCategory(id: string, category: Category): Promise<void> {
-  const { error } = await supabase.from('todo').update({ category }).eq('id', id);
+  const { error } = await getSupabase().from('todo').update({ category }).eq('id', id);
   if (error) throw error;
 }
