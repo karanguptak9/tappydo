@@ -4,6 +4,14 @@ export default function Projects() {
   type Project = { title: string; description: string; image: string; tags: string[]; link: string; cta?: string };
   const projects: Project[] = [
     {
+      title: "Sand to Silicon: Chip-Making Simulator",
+      description: "An interactive simulator that teaches how computer chips are made in 18 steps, from sand to a working device. Includes a kid-friendly mode and a wafer fab simulation.",
+      image: "🔬",
+      tags: ["JavaScript", "Canvas", "Simulation", "Semiconductors"],
+      link: "/projects/sand-to-silicon",
+      cta: "Open Simulator"
+    },
+    {
       title: "Automated Task Manager",
       description: "A smart task manager that automatically categorizes your tasks using keyword detection. Built with Next.js, React, and Supabase.",
       image: "✅",

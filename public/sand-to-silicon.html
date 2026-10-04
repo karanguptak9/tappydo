@@ -1,0 +1,563 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="description" content="Sand to Silicon: an interactive simulator for learning how computer chips are made, from sand to a working device."><meta name="viewport" content="width=device-width,initial-scale=1"><style>html{height:100%}body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>Sand to Silicon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one centred card on a soft pastel ground. The dark tool viewport is the only strong shape on the page. */
+:root{
+  color-scheme:light;
+  --bg:#f1eefc; --panel:#ffffff; --ink:#2a2d4f; --muted:#62678c; --line:#dfe1f3;
+  --p1:#c0700c; --p2:#6a3bf2; --p3:#0b8f63; --accent:#c2267f; --duv:#1f6fe0;
+  --good:#0f9a68; --goodbg:#d8f6e7; --warn:#9a5b00; --warnbg:#fff0cc; --bad:#d12a4b; --on:#ffffff;
+  --scope:#0e1233;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:linear-gradient(180deg,#fffbeb 0%,#ffffff 100%) fixed #fffbeb;color:var(--ink);font:18px/1.5 var(--body);padding-inline:16px;padding-block:20px 56px;min-height:100%}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:18px;align-items:stretch}
+header{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+h1{font:800 clamp(30px,6vw,44px)/1 var(--display);margin:0;letter-spacing:-.02em}
+h1 span:nth-child(1){color:var(--p1)} h1 span:nth-child(2){color:var(--p2)} h1 span:nth-child(3){color:var(--p3)}
+h2{font:800 clamp(24px,4.5vw,32px)/1.15 var(--display);margin:0;text-wrap:balance}
+h3{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+p{margin:0}
+.lede{color:var(--muted);max-width:56ch;margin:0 auto;text-align:center}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.tab{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 18px;font-weight:600;font-size:16px}
+.tab[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.panel,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}
+.view{display:flex;flex-direction:column;gap:16px}
+[data-ph="0"]{--ph:var(--p1)} [data-ph="1"]{--ph:var(--p2)} [data-ph="2"]{--ph:var(--p3)}
+
+/* build */
+.card{display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;padding:24px}
+.dots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.st{width:36px;height:36px;border-radius:50%;border:2px solid var(--ph);background:transparent;color:var(--ph);font:500 14px var(--mono);padding:0}
+.st.good{background:var(--goodbg);border-color:var(--good);color:var(--good)}
+.st[aria-current="true"]{background:var(--ph);border-color:var(--ph);color:var(--on);transform:scale(1.15)}
+.head{display:flex;flex-direction:column;gap:8px;align-items:center}
+.tag{font:600 14px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ph)}
+.ask{font-size:20px;font-weight:500;max-width:36ch;text-wrap:balance}
+.frame{position:relative;width:100%;max-width:640px;border:6px solid var(--line);border-radius:22px;overflow:hidden;transition:border-color .2s}
+.frame.good{border-color:var(--good)}
+canvas{display:block;width:100%;aspect-ratio:640/300;background:var(--scope)}
+.badge{position:absolute;top:10px;right:10px;width:48px;height:48px;border-radius:50%;background:var(--good);color:#fff;font:800 28px/48px var(--display);text-align:center}
+.ctl{display:flex;flex-direction:column;gap:10px;width:100%;max-width:640px;align-items:center}
+.val{font:800 40px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--ink)}
+.val.good{color:var(--good)}
+.lab{font-weight:600;color:var(--muted)}
+.sl{display:flex;gap:12px;align-items:center;width:100%}
+.pm{flex:none;width:56px;height:56px;border-radius:50%;border:2px solid var(--line);background:var(--panel);font:800 30px/1 var(--display)}
+.track{position:relative;flex:1;min-width:0;height:56px}
+.rail{position:absolute;left:22px;right:22px;top:21px;height:14px;border-radius:7px;background:var(--line)}
+.zone{position:absolute;top:-5px;height:24px;border-radius:8px;background:var(--goodbg);border:2px solid var(--good)}
+.track input{position:absolute;inset:0;width:100%;height:100%;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+.track input::-webkit-slider-runnable-track{background:transparent;height:56px}
+.track input::-moz-range-track{background:transparent;height:56px}
+.track input::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;border-radius:50%;background:var(--th,var(--ink));border:4px solid #fff;box-shadow:0 2px 8px #2a2d4f55;margin-top:6px}
+.track input::-moz-range-thumb{width:36px;height:36px;border-radius:50%;background:var(--th,var(--ink));border:4px solid #fff;box-shadow:0 2px 8px #2a2d4f55}
+.track.good{--th:var(--good)}
+.zl{font-size:15px;color:var(--good);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.opt{border:3px solid var(--line);background:var(--panel);border-radius:16px;padding:14px 20px;font-weight:600;min-height:60px}
+.opt[aria-pressed="true"]{border-color:var(--warn);background:var(--warnbg)}
+.opt.right[aria-pressed="true"]{border-color:var(--good);background:var(--goodbg);color:var(--good)}
+.status{width:100%;max-width:640px;border-radius:16px;padding:14px 18px;background:var(--warnbg);color:var(--ink);border:2px solid transparent}
+.status b{display:block;font:800 22px/1.2 var(--display);color:var(--warn)}
+.status.good{background:var(--goodbg);border-color:var(--good)} .status.good b{color:var(--good)}
+.nav{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.go{border:0;border-radius:16px;background:var(--ink);color:#fff;padding:14px 28px;font-weight:600;min-height:56px}
+.go.ready{background:var(--good)}
+.ghost{border:2px solid var(--line);background:var(--panel);border-radius:16px;padding:12px 20px;font-weight:500;min-height:48px}
+.ghost:disabled{opacity:.4;cursor:default}
+.what{max-width:58ch;color:var(--muted)}
+.what.kid{background:#fff4cf;border-radius:18px;padding:18px 22px;color:var(--ink);font-size:20px;line-height:1.55;max-width:34em}
+.kidbtn[aria-pressed="true"]{background:#f2a900;border-color:#f2a900;color:#2a2d4f}
+details{width:100%;max-width:640px;text-align:left;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;text-align:center}
+#info{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+.fact b{font:800 28px/1.1 var(--display);color:var(--ph);overflow-wrap:anywhere;display:block}
+.fact span,.who{color:var(--muted)}
+.funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;text-align:left}
+.fn{display:flex;flex-direction:column;gap:2px;border-top:4px solid var(--c);padding-top:8px;min-width:0}
+.fn b{font:800 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.fn span{color:var(--muted);font-size:14px}
+.note{color:var(--muted);font-size:14px}
+.fix{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+
+/* fab */
+.fab{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px;align-items:start;font-size:15px}
+.knobs{display:flex;flex-direction:column;gap:12px}
+.knob label{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.knob output{font:500 14px var(--mono)}
+.knob input{width:100%;accent-color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:center;font-weight:600}
+.out{display:flex;flex-direction:column;gap:16px;min-width:0}
+.out .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}
+.util{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px 10px;align-items:center;font-size:14px}
+.bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.gantt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;align-items:center;font:500 12px var(--mono)}
+.trk{position:relative;height:16px;border-radius:4px;background:#eef0fa}
+.trk span{position:absolute;top:0;height:100%}
+.trk .life{background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px);border-radius:4px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--c);margin-right:5px;vertical-align:-1px}
+.insight{border-left:4px solid var(--accent);padding-left:12px;font-weight:500}
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;font-size:16px}
+.seg{display:flex;flex-direction:column;gap:8px;border-top:5px solid var(--c)}
+.seg h2{font-size:20px}
+.seg .cos{font:500 13px var(--mono);color:var(--muted)}
+.seg button{align-self:flex-start;margin-top:auto;font-size:15px}
+@media (max-width:640px){.fab{grid-template-columns:minmax(0,1fr)}.funnel{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:16px}.pm{width:48px;height:48px}.val{font-size:34px}}
+@media (prefers-reduced-motion:reduce){.frame,.st{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tabs">
+      <button class="tab" id="tab-build" aria-pressed="true">Build a chip</button>
+      <button class="tab" id="tab-fab" aria-pressed="false">Run the fab</button>
+      <button class="tab" id="tab-map" aria-pressed="false">Who does what</button>
+    </div>
+  </header>
+
+  <section class="view" id="view-build">
+    <div class="card" id="card">
+      <div class="dots" id="phases"></div>
+      <div class="head"><span class="tag" id="tag"></span><h2 id="name"></h2><p class="ask" id="ask"></p></div>
+      <div class="frame" id="frame"><canvas id="cv" role="img" aria-label="Animated view of the current step"></canvas><div class="badge" id="badge" hidden>✓</div></div>
+      <div class="ctl" id="ctl"></div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="nav"><button class="ghost" id="back">← Back</button><button class="go" id="next">Next step →</button></div>
+      <div class="tabs" role="group" aria-label="How to explain this step"><button class="tab" id="m-std" aria-pressed="true">Explain it</button><button class="tab kidbtn" id="m-kid" aria-pressed="false">Learn it like a kid</button></div>
+      <p class="what" id="what"></p>
+      <div class="fact" id="info"></div>
+    </div>
+    <div class="card" id="results" hidden>
+      <h2>Your results from one wafer</h2>
+      <div class="funnel" id="funnel"></div>
+      <p class="note" id="fnote"></p>
+      <div class="fix" id="fix"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-fab" hidden>
+    <p class="lede">A real fab is a traffic problem. Lots of 25 wafers (carried in pods called FOUPs) visit the same tools again and again, once per layer. Change the tool counts and watch where the queues form.</p>
+    <div class="fab">
+      <div class="panel knobs" id="knobs"></div>
+      <div class="out">
+        <div class="panel funnel" id="fstats"></div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+          <h3>Tool utilisation and queueing</h3>
+          <div class="util" id="util"></div>
+          <p class="insight" id="insight"></p>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+          <h3>Lot timeline (hours)</h3>
+          <div class="legend">
+            <span><i style="--c:var(--p2)"></i>EUV litho</span><span><i style="--c:var(--duv)"></i>DUV litho</span>
+            <span><i style="--c:var(--p1)"></i>Etch</span><span><i style="--c:var(--p3)"></i>Packaging</span>
+            <span><i style="--c:var(--bad)"></i>Tool down</span><span><i style="--c:var(--line)"></i>Waiting in queue</span>
+          </div>
+          <div class="gantt" id="gantt"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-map" hidden>
+    <p class="lede">No single company makes a chip alone. These are the kinds of business in the chain, what each one sells, and where you meet them in the simulator.</p>
+    <div class="map" id="map"></div>
+  </section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const PH=['Phase 1 · Sand to wafer','Phase 2 · Wafer to die (the fab)','Phase 3 · Die to device'];
+const S=(label,unit,min,max,step,start,ideal,tol,low,high)=>({type:'slider',label,unit,min,max,step,start,ideal,tol,low,high});
+const STEPS=[
+{ph:0,id:'reduce',name:'Smelt quartz into silicon',
+ what:'Quartz rock (silicon dioxide) and carbon go into a submerged arc furnace. The carbon pulls the oxygen away and leaves liquid silicon about 98% pure.',
+ tip:'Set the furnace near 1,900 °C.',fact:['98%','purity of metallurgical-grade silicon'],
+ who:'Smelters such as Ferroglobe, Elkem and Hoshine Silicon. Most of this silicon goes into aluminium alloys and silicones. Chips use a tiny share.',
+ ctl:S('Furnace temperature','°C',1000,2600,50,1300,1900,100,'Too cold. The quartz never fully reduces and slag clogs the furnace.','Too hot. Silicon boils off as gas and you waste power.')},
+{ph:0,id:'purify',name:'Refine to nine nines',
+ what:'The silicon reacts with hydrogen chloride to form trichlorosilane, a liquid that can be distilled over and over. In a Siemens reactor it then deposits back onto hot rods as ultra-pure polysilicon.',
+ tip:'Chips need at least 9N: nine nines, 99.9999999%. Solar cells get by with about 6N.',fact:['1 in a billion','impurity atoms allowed'],
+ who:'Wacker Chemie, Hemlock Semiconductor and Tokuyama supply most electronic-grade polysilicon.',
+ ctl:S('Purity target','N',4,12,1,6,10,1,'Not pure enough. Stray atoms act as unwanted dopants and kill transistors.','Purer than needed. It works, but each extra nine costs energy and money.')},
+{ph:0,id:'pull',name:'Pull a single crystal',
+ what:'Polysilicon melts in a quartz crucible at about 1,420 °C. A seed crystal touches the melt and is pulled up slowly while rotating, so the atoms freeze onto it in one continuous lattice. This is the Czochralski method.',
+ tip:'Pull at about 1 mm per minute for a 300 mm ingot.',fact:['300 mm','ingot diameter. One ingot weighs over 100 kg'],
+ who:"Shin-Etsu Chemical, SUMCO, GlobalWafers, Siltronic and SK Siltron make most of the world's wafers.",
+ ctl:S('Pull speed','mm/min',0.2,3,0.1,2.2,1,0.2,'Too slow. The ingot grows too wide and the furnace is tied up for days.','Too fast. The ingot comes out thin and full of dislocations.')},
+{ph:0,id:'slice',name:'Slice and polish wafers',
+ what:'A diamond wire saw cuts the ingot into discs. Lapping, etching and chemical-mechanical polishing then make one side flat to within nanometres, like a mirror.',
+ tip:'A 300 mm wafer is 775 µm thick.',fact:['775 µm','standard thickness of a 300 mm wafer'],
+ who:'The wafer makers do this in-house and ship finished wafers to fabs in sealed boxes.',
+ ctl:S('Wafer thickness','µm',300,1200,25,500,775,25,'Too thin. Wafers this wide will warp and crack in handling.','Too thick. You get fewer wafers per ingot and fab tools reject them.')},
+{ph:1,id:'oxid',name:'Grow oxide and deposit films',
+ what:'In an ISO Class 1 cleanroom, a furnace grows a thin insulating layer of silicon dioxide on the wafer. Other films are added by chemical vapor deposition (CVD) or atomic layer deposition (ALD), one atomic layer at a time.',
+ tip:'Thermal oxide grows well near 1,000 °C.',fact:['400–1,000+','process steps per wafer, over 12 to 16 weeks'],
+ who:'Applied Materials, Lam Research, Tokyo Electron, ASM International and Kokusai Electric.',
+ ctl:S('Furnace temperature','°C',600,1300,25,700,1000,75,'Too cold. The oxide grows slowly and comes out thin and leaky.','Too hot. The wafer warps and dopants spread where they should not.')},
+{ph:1,id:'coat',name:'Spin on photoresist',
+ what:'A puddle of light-sensitive polymer is dropped on the wafer, which then spins fast. Spinning flings the liquid outward into an even film.',
+ tip:'Around 3,000 rpm gives an even coat.',fact:['~3,000 rpm','typical spin speed'],
+ who:'Tokyo Electron builds nearly all coater-developer tracks. Resist chemicals come from JSR, Tokyo Ohka Kogyo, Shin-Etsu and DuPont.',
+ ctl:S('Spin speed','rpm',500,6000,100,1000,3000,500,'Too slow. The resist stays thick and uneven at the edges.','Too fast. The film is too thin to protect the wafer during etch.')},
+{ph:1,id:'litho',name:'Print the pattern with light',
+ what:'A scanner shines light through a photomask and shrinks the circuit image onto the resist. Shorter wavelengths print smaller features. Exposed resist washes away in developer.',
+ tip:'This chip is a leading-edge design. Its smallest layers need extreme ultraviolet light.',fact:['13.5 nm','EUV wavelength, made by hitting tin droplets with a laser'],
+ who:'ASML is the only maker of EUV scanners, at well over $150 million each. Nikon and Canon also sell DUV tools. Zeiss makes the optics.',
+ ctl:{type:'choice',label:'Light source',start:0,opts:[
+  {l:'i-line · 365 nm',q:.2,m:'Far too coarse. Features blur together at this node.'},
+  {l:'DUV · 193 nm',q:.7,m:'It works with several patterning passes, but each pass adds cost and defects.'},
+  {l:'EUV · 13.5 nm',q:1,m:'Sharp patterns in a single exposure.'}]}},
+{ph:1,id:'etch',name:'Etch away what is exposed',
+ what:'A plasma of reactive ions bombards the wafer. Where the resist has opened, the film beneath is removed straight down. Where resist remains, the film is protected.',
+ tip:'Stop when the oxide is just cleared: about 45 seconds here.',fact:['atom-scale','depth control in modern plasma etch'],
+ who:'Lam Research, Tokyo Electron and Applied Materials.',
+ ctl:S('Etch time','s',10,90,5,20,45,5,'Under-etched. Oxide is left in the openings, so nothing connects.','Over-etched. The plasma has dug into the silicon underneath.')},
+{ph:1,id:'implant',name:'Implant dopants and anneal',
+ what:'An ion implanter fires dopant atoms into the bare silicon to change how it conducts. Boron makes p-type silicon. Phosphorus and arsenic make n-type. A quick anneal then repairs the crystal damage.',
+ tip:'This step forms an n-type region.',fact:['~1,000 °C','anneal temperature, held for seconds'],
+ who:'Applied Materials and Axcelis build most ion implanters.',
+ ctl:{type:'choice',label:'Dopant',start:0,opts:[
+  {l:'Boron',q:.3,m:'Boron is an acceptor. You made p-type silicon where the design needs n-type.'},
+  {l:'Phosphorus',q:1,m:'Phosphorus donates an electron: n-type, as designed.'},
+  {l:'Copper',q:.1,m:'Copper is a contaminant in silicon. It kills transistors, which is why fabs keep it away from this part of the line.'}]}},
+{ph:1,id:'cmp',name:'Polish the surface flat',
+ what:'Each new film follows the bumps below it. Chemical-mechanical planarization (CMP) presses the wafer against a spinning pad with a chemical slurry until the surface is flat enough for the next lithography step to focus.',
+ tip:'About 60 seconds of polish clears the bumps.',fact:['dozens','of CMP passes on one advanced wafer'],
+ who:'Applied Materials and Ebara make the polishers. Entegris and Fujimi supply slurries.',
+ ctl:S('Polish time','s',10,150,5,20,60,10,'Under-polished. Bumps remain and the next layer prints out of focus.','Over-polished. The pad dishes into soft areas and thins the film.')},
+{ph:1,id:'metal',name:'Wire it up with metal',
+ what:'Trenches are etched into insulating layers and filled with metal by electroplating. Ten to twenty stacked layers of wiring connect billions of transistors. This is the back end of line (BEOL).',
+ tip:'Modern logic chips use the metal with the lowest resistance that can be plated.',fact:['billions','of transistors on one leading-edge chip'],
+ who:'Applied Materials for metal deposition, Lam Research for copper plating.',
+ ctl:{type:'choice',label:'Wiring metal',start:0,opts:[
+  {l:'Aluminium',q:.6,m:'Aluminium works and older chips use it, but its higher resistance slows a dense modern chip.'},
+  {l:'Copper',q:1,m:'Copper: low resistance, plated into trenches (the damascene process).'},
+  {l:'Gold',q:.25,m:'Gold conducts well but diffuses into silicon and ruins transistors. Fabs ban it.'}]}},
+{ph:1,id:'sort',name:'Probe every die',
+ what:'Fine needles touch down on each die and run electrical tests while the wafer is still whole. Failing dice are marked on a wafer map so nobody pays to package them.',
+ tip:'Choose how big your chip is. Bigger dice are more likely to catch a defect, and fewer fit on the wafer. Mistakes in earlier steps raise the defect density.',fact:['Y = e^(−A·D₀)','Poisson yield model: die area × defect density'],
+ who:'Testers from Advantest and Teradyne, probers from Tokyo Electron and Accretech, probe cards from FormFactor and Technoprobe. KLA leads in inspection.',
+ ctl:{type:'slider',label:'Die area',unit:'mm²',min:25,max:800,step:25,start:100,free:true}},
+{ph:2,id:'dice',name:'Thin and dice the wafer',
+ what:'The back of the wafer is ground down so the chip fits a thin package and sheds heat. A diamond blade or stealth laser then cuts along the lanes between dice.',
+ tip:'Grind to roughly 50–100 µm.',fact:['~75 µm','about the width of a human hair'],
+ who:'Disco dominates grinders and dicing saws.',
+ ctl:S('Thickness after grinding','µm',20,400,5,300,75,25,'Too thin. Dice crack when picked up.','Too thick. The die will not fit the package and runs hot.')},
+{ph:2,id:'attach',name:'Attach the die to its package',
+ what:'Good dice are placed on a package substrate that fans the tiny chip contacts out to a size a circuit board can use. The electrical link is made with thin wires, or by flipping the die onto an array of micro-bumps.',
+ tip:'This chip has thousands of connections and runs hot.',fact:['1,000s','of bumps under one flip-chip processor'],
+ who:'Packaging houses (OSATs) such as ASE, Amkor and JCET, plus TSMC for advanced packaging. Substrates come from Ibiden, Unimicron and Shinko.',
+ ctl:{type:'choice',label:'Interconnect',start:0,opts:[
+  {l:'Wire bond',q:.6,m:'Wire bonding is cheap and reliable, but wires only reach the die edge. Too few connections for this chip.'},
+  {l:'Flip-chip bumps',q:1,m:'Bumps cover the whole die face: short paths and thousands of connections.'},
+  {l:'Adhesive only',q:.1,m:'The die is stuck down but nothing is electrically connected.'}]}},
+{ph:2,id:'mold',name:'Seal it in mold compound',
+ what:'Epoxy mold compound is injected around the die and cured. It protects against moisture, shock and thermal stress. Solder balls are then placed on the underside to form a ball grid array.',
+ tip:'Epoxy mold compound cures near 175 °C.',fact:['BGA','ball grid array: the grid of solder balls under the package'],
+ who:'Mold compounds from Sumitomo Bakelite and Resonac. Molding machines from Towa.',
+ ctl:S('Cure temperature','°C',100,260,5,120,175,10,'Under-cured. The mold stays soft and lets moisture in.','Too hot. The package warps and the bumps crack.')},
+{ph:2,id:'test',name:'Final test and burn-in',
+ what:'Each packaged chip is run hot at raised voltage to force weak parts to fail early. Survivors are tested at speed across temperature and voltage corners and sorted into speed grades.',
+ tip:'Burn-in commonly runs at about 125 °C.',fact:['speed binning','the same die sells at different prices depending on how fast it tests'],
+ who:'Advantest and Teradyne testers, Cohu handlers.',
+ ctl:S('Burn-in temperature','°C',25,220,5,40,125,15,"Too gentle. Weak chips pass here and fail later in customers' hands.",'Too harsh. You are damaging good chips.')},
+{ph:2,id:'smt',name:'Mount it on a circuit board',
+ what:'Solder paste is printed onto the board through a stencil. Pick-and-place machines set down the chip with its capacitors, resistors and power ICs, and a reflow oven melts the paste into joints.',
+ tip:'Lead-free solder melts near 217 °C. Peak the oven at about 245 °C.',fact:['10,000s','of parts per hour placed by one machine'],
+ who:'Contract manufacturers such as Foxconn, Pegatron, Jabil and Flex. Placement machines from Fuji, Yamaha, ASMPT and Panasonic.',
+ ctl:S('Reflow peak temperature','°C',180,300,5,200,245,10,'Too cool. The solder never fully melts: cold joints.','Too hot. Components and the board itself are damaged.')},
+{ph:2,id:'system',name:'Assemble and flash firmware',
+ what:'The board goes into its housing and connects to the battery, display and sensors. A bootloader and firmware are written to memory, and the device runs a self-test before it ships.',
+ tip:'Nothing to tune here. Power it on.',fact:['months','from sand to a working device, across many countries'],
+ who:'The brand on the box, such as Apple, Samsung or Dell, usually built by a contract manufacturer.',ctl:null}
+];
+const KID=[
+"Sand is mostly silicon stuck to oxygen. We put it in a giant oven that is hotter than lava and add charcoal. The charcoal grabs the oxygen and leaves shiny melted silicon behind.",
+"The silicon is still a little dirty, like water with mud in it. We turn it into a liquid and boil it again and again, keeping only the clean part each time. At the end, out of a billion atoms, only one is dirt.",
+"Have you seen sugar grow on a string to make rock candy? This is the same trick. We dip a tiny crystal into melted silicon and lift it very slowly while it spins. A giant, perfect crystal grows under it, heavier than a grown-up.",
+"Now we slice the crystal like a loaf of bread, but each slice is thinner than a coin. Then we polish every slice until it shines like a mirror. Each slice is called a wafer.",
+"We bake the wafer in a very clean, very hot oven. A thin layer of glass grows on top, like the crust on bread. This glass stops electricity from going where it should not.",
+"We drop some special goo in the middle of the wafer and spin it really fast, like a merry-go-round. The goo spreads into a thin, even coat. This goo changes when light touches it.",
+"This is like using a stencil and a flashlight. Light shines through a stencil of the chip's drawing and lands on the goo. Where the light hits, the goo washes away. The lines are so tiny that we need a special light your eyes cannot see.",
+"Now we blast the wafer with a glowing gas. Where the goo is gone, the gas digs a little trench. Where the goo is still there, it works like a raincoat and protects what is under it.",
+"Pure silicon is not very good at carrying electricity. So we shoot a sprinkle of special atoms into it, like adding a pinch of salt to food. Now those spots can switch electricity on and off. These tiny switches are called transistors.",
+"After we add layers, the top gets bumpy, like a road with potholes. We rub it with a spinning pad and gritty liquid, like sanding wood, until it is perfectly flat. Then the next layer can sit on it neatly.",
+"The chip has billions of tiny switches, and they need to talk to each other. We fill tiny trenches with copper to make wires, like roads between houses. Many layers of roads are stacked up, like a city with bridges on top of bridges.",
+"One wafer holds hundreds of chips, like a sheet of stamps. A machine with tiny needles pokes each chip and checks if it works. Good chips get a green mark and broken ones get a red mark. Bigger chips are more likely to have a speck of dust that breaks them.",
+"First we sand the back of the wafer until it is as thin as a hair. Then we cut it into little squares, like cutting a tray of brownies. Each square is one chip.",
+"The chip is tiny and fragile, so it needs a little seat to sit on. We flip it over and set it on lots of tiny metal balls, like a building brick clicking onto its bumps. The bumps carry electricity in and out.",
+"We cover the chip with black plastic that hardens when baked, like a hard candy shell. This keeps out water and protects it from knocks. Then we stick little metal balls on the bottom. These are its feet.",
+"Before a chip leaves the factory, it has to pass an exam. We make it hot and make it work very hard to see if it gets tired. Weak chips fail here, so they do not fail inside your phone.",
+"A robot picks up the chip and its little helper parts and puts them on a green board, faster than you can blink. Then the board rides through an oven. A metal glue called solder melts, then hardens, and holds everything in place.",
+"The board goes into its case with a battery and a screen. Then we load its instructions, which tell it what to do. Press the power button and it wakes up. Sand has become a computer."];
+STEPS.forEach((s,i)=>s.kid=KID[i]);let kid=false;
+const IDX=Object.fromEntries(STEPS.map((s,i)=>[s.id,i])), SORT=IDX.sort;
+const vals=STEPS.map(s=>!s.ctl?0:s.ctl.type==='choice'?-1:s.ctl.start), res=STEPS.map(()=>null);
+let cur=0,T=0;
+
+/* ---------- scoring ---------- */
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function score(i){const s=STEPS[i],k=s.ctl,v=vals[i];
+  if(!k||k.free)return{q:1,cls:'good',head:'Done',msg:''};
+  if(k.type==='choice'){const o=k.opts[v];return{q:o.q,cls:o.q>=.95?'good':o.q>=.55?'warn':'bad',head:o.q>=.95?'On target':o.q>=.55?'Marginal':'Out of spec',msg:o.m}}
+  const d=Math.abs(v-k.ideal);
+  if(d<=k.tol+1e-9)return{q:1,cls:'good',head:'On target',msg:'Well done. Go on to the next step.'};
+  const q=Math.max(.15,1-(d-k.tol)/((k.max-k.min)*.45));
+  return{q,cls:q>=.6?'warn':'bad',head:q>=.6?'Marginal':'Out of spec',msg:v<k.ideal?k.low:k.high}}
+const qOf=i=>res[i]?res[i].q:1;
+function dieMap(A,Y){const s=Math.sqrt(A),R=147,n=Math.ceil(R/s),rnd=mulberry(7+A),out=[];
+  for(let i=-n;i<n;i++)for(let j=-n;j<n;j++){const x=i*s,y=j*s;
+    if([[x,y],[x+s,y],[x,y+s],[x+s,y+s]].every(p=>Math.hypot(p[0],p[1])<=R))out.push({x,y,ok:rnd()<Y})}
+  return{s,dies:out}}
+function line(){let q=0;for(let i=0;i<SORT;i++)q+=qOf(i);q/=SORT;
+  const A=vals[SORT],D0=0.07+1.2*(1-q),Y=Math.exp(-A/100*D0),m=dieMap(A,Y);
+  const N=m.dies.length,G=m.dies.filter(d=>d.ok).length;
+  const f=(i,base)=>base-.35*(1-qOf(i));
+  const pk=Math.round(G*f(IDX.dice,.99)*f(IDX.attach,.99)*f(IDX.mold,.99)*f(IDX.test,.97));
+  const dev=Math.round(pk*f(IDX.smt,.995)*f(IDX.system,1));
+  return{A,D0,Y,m,N,G,pk,dev}}
+
+/* ---------- canvas scenes ---------- */
+const cv=$('#cv'),c=cv.getContext('2d'),W=640,H=300;
+const SI='#8ea2cc',OX='#4fd0e8',RS='#ff6fae',CU='#ff9a4d',MELT='#ff7a2f',INK='#e8ecff',DIM='#8089c4',GRN='#34d399',RED='#ff5a7a',VIO='#a98bff';
+function fit(){const d=Math.min(window.devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0)}
+const R=(x,y,w,h,f)=>{c.fillStyle=f;c.fillRect(x,y,w,h)};
+const C=(x,y,r,f)=>{c.fillStyle=f;c.beginPath();c.arc(x,y,Math.max(r,0),0,7);c.fill()};
+const RR=(x,y,w,h,r,f)=>{c.fillStyle=f;c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);c.fill()};
+const TX=(s,x,y,f=INK,sz=13,al='left')=>{c.fillStyle=f;c.font=`500 ${sz}px "IBM Plex Mono",ui-monospace,monospace`;c.textAlign=al;c.fillText(s,x,y)};
+const LN=(x1,y1,x2,y2,s,w=2)=>{c.strokeStyle=s;c.lineWidth=w;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke()};
+const L=(a,b,t)=>a+(b-a)*t, cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), h=i=>{const s=Math.sin(i*12.9898)*43758.5453;return s-Math.floor(s)};
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+
+function xsec(s,t,v){const x0=70,x1=570,sy=200,ops=[140,250,360,470],ow=44,oh=s===0?22*t*cl((v-600)/400,.15,1.7):22;
+  R(x0,sy,x1-x0,70,SI);TX('silicon',x0+8,sy+60,'#1b2150',12);
+  if(s>=4){const a=s===4?t:1;c.globalAlpha=.9;ops.forEach(o=>{c.fillStyle='#ffd166';c.beginPath();c.ellipse(o+ow/2,sy,32,20*a,0,0,Math.PI);c.fill()});c.globalAlpha=1}
+  let depth=s<3?0:s===3?oh*t*cl(v/45,0,1.6):oh;
+  R(x0,sy-oh,x1-x0,oh,OX);
+  if(depth>0)ops.forEach(o=>{R(o,sy-oh,ow,Math.min(depth,oh),'#0e1233');if(depth>oh)R(o,sy,ow,depth-oh,'#0e1233')});
+  if(s>=1&&s<=3){const rh=24,ry=sy-oh-rh,w=s===1?(x1-x0)*L(.12,1,t):x1-x0,rx=(x0+x1)/2-w/2;
+    const th=s===1?rh*L(2,1,t)*cl(3000/Math.max(v,500),.5,1.8):rh;
+    R(rx,sy-oh-th,w,th,RS);
+    if(s===2&&t>.2&&t<=.65)ops.forEach(o=>R(o,ry,ow,rh,'#ffe08a'));
+    if((s===2&&t>.65)||s===3)ops.forEach(o=>R(o,ry,ow,rh,'#0e1233'))}
+  if(s===2){const col=['#ffd166','#6aa8ff',VIO][v];R(x0,70,x1-x0,10,'#cfd6ee');ops.forEach(o=>R(o,70,ow,10,'#0e1233'));
+    TX('photomask',x0,62,DIM,12);
+    if(t>.05&&t<.7){c.globalAlpha=.55;ops.forEach(o=>{const sp=[18,6,0][v];c.fillStyle=col;c.beginPath();c.moveTo(o,80);c.lineTo(o+ow,80);c.lineTo(o+ow+sp,sy-oh-24);c.lineTo(o-sp,sy-oh-24);c.closePath();c.fill()});c.globalAlpha=1;R(x0,30,x1-x0,6,col)}
+    TX(['365 nm','193 nm','13.5 nm'][v],x1,24,col,13,'right')}
+  if(s===3&&t>0&&t<1)for(let i=0;i<60;i++)C(x0+h(i)*(x1-x0),40+((h(i+7)+t*3)%1)*(sy-oh-70),2,VIO);
+  if(s===3)TX('plasma',x0,30,VIO,12);
+  if(s===4&&t>0&&t<1)for(let i=0;i<50;i++){const x=x0+h(i)*(x1-x0),y=30+((h(i+3)+t*4)%1)*(sy-52);LN(x,y,x,y+8,['#ff8fa3','#ffd166','#ff9a4d'][v],2)}
+  if(s===4)TX('ion beam: '+['B⁺','P⁺','Cu⁺'][v],x0,24,'#ffd166',12);
+  if(s>=5){const bump=s===5?12*(1-t*cl(v/60)):0,top=sy-oh-26;
+    R(x0,top,x1-x0,26+oh,'#3c8f9e');c.globalCompositeOperation='destination-over';c.globalCompositeOperation='source-over';
+    R(x0,sy-oh,x1-x0,0,OX);
+    for(let k=0;k<=ops.length;k++){const a=k?ops[k-1]+ow:x0,b=k<ops.length?ops[k]:x1;R(a,sy-oh,b-a,oh,OX);if(bump>0)RR(a+4,top-bump,b-a-8,bump+2,6,'#3c8f9e')}
+    if(s===5&&v>70){const dp=cl((v-70)/80)*16*t;ops.forEach(o=>{c.fillStyle='#0e1233';c.beginPath();c.ellipse(o+ow/2,top,ow*.75,dp,0,0,Math.PI);c.fill()})}
+    if(s===5){const py=L(60,top-bump-22,cl(t*3));RR(x0+20,py,x1-x0-40,20,8,'#cfd6ee');TX('polishing pad + slurry',x0+30,py-8,DIM,12)}
+    if(s===6){const col=['#cfd6ee',CU,'#ffd700'][v];ops.forEach(o=>{const hh=(26+oh)*t;R(o+8,sy-hh,ow-16,hh,col)});
+      if(t>.6){const w=(x1-x0-40)*cl((t-.6)/.4);R(x0+20,top-14,w,12,col)}
+      TX(['aluminium','copper','gold'][v]+' interconnect',x0,top-26,col,12)}}
+}
+function pkg(stage,t,mode,cure=175){const p=stage===0?cl(t*2-1):1,sit=mode===1?166:170,y=stage===0?L(50,sit,cl(t*2)):sit;
+  RR(150,200,340,24,4,'#1f9d6b');for(let i=0;i<12;i++)R(165+i*28,200,12,4,'#ffd166');TX('package substrate',150,246,DIM,12);
+  if(mode===2)R(250,196,140,4,'#8089c4');
+  RR(250,y,140,30,3,SI);TX('die',320,y+20,'#1b2150',12,'center');
+  if(mode===1)for(let i=0;i<10*p;i++)C(258+i*14,198,4,CU);
+  if(mode===0)for(let i=0;i<6*p;i++){const l=i%2===0,k=i>>1,x=l?256+k*8:384-k*8,px=l?200-k*14:440+k*14;c.strokeStyle='#ffd700';c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo((x+px)/2,y-40-k*8,px,200);c.stroke()}
+  if(stage===1){const soft=cure<165,hot=cure>185;c.globalAlpha=soft?.55:.93;RR(170,112,300*t,88,soft?28:6,soft?'#7a6fa0':'#05060f');c.globalAlpha=1;
+    if(soft)for(let i=0;i<5;i++)RR(190+i*55,196,10,8+h(i)*26*t,5,'#7a6fa0');
+    if(hot&&t>.5){LN(210,112,250,160,RED,2.5);LN(250,160,235,200,RED,2.5);LN(380,112,350,150,RED,2.5);LN(350,150,400,200,RED,2.5)}
+    if(t>.5)TX(soft?'soft and leaky':hot?'warped and cracked':'',470,104,RED,12,'right');if(t>.3)TX('epoxy mold compound',180,104,DIM,12);
+    if(t>.6)for(let i=0;i<12*cl((t-.6)/.4);i++)C(166+i*28,233,8,'#cfd6ee')}
+}
+const SCN={
+reduce(t,v){const g=cl((v-1000)/1600);c.fillStyle='#2a3063';c.beginPath();c.moveTo(200,90);c.lineTo(440,90);c.lineTo(410,265);c.lineTo(230,265);c.closePath();c.fill();
+  const gr=c.createRadialGradient(320,235,5,320,235,160);gr.addColorStop(0,`rgba(255,${120+110*g|0},40,${.2+.7*g})`);gr.addColorStop(1,'rgba(255,120,40,0)');c.fillStyle=gr;c.fillRect(160,70,320,200);
+  [270,320,370].forEach(x=>R(x-9,20,18,170,'#5a6199'));
+  for(let i=0;i<46;i++){const y=L(40,240,cl(t*1.7-h(i+50)*.7));if(t>0&&y<238)C(215+h(i)*210,y,3.2,i%3?'#f6d58a':'#555a78')}
+  const ok=cl((v-1000)/800),mc=v<1700?'#a8683e':v>2050?'#ffe9a8':MELT;R(233,L(262,L(255,228,ok),t),174,L(3,L(10,37,ok),t),mc);
+  if(v<1700)for(let i=0;i<7;i++)RR(245+i*22,246-h(i)*8,16,11,3,'#6b6f8c');
+  if(v>2050)for(let i=0;i<24;i++)C(240+h(i+80)*160,200-((h(i+90)+t*2)%1)*160,4+h(i)*6,'rgba(255,225,160,.4)');
+  TX('SiO₂ + 2C → Si + 2CO',20,28);TX(fmt(v)+' °C',620,28,MELT,15,'right');TX('carbon electrodes',460,60,DIM,12);TX(v<1700?'cold slag, not melted':v>2050?'silicon boiling away':'liquid silicon',460,250,MELT,12)},
+purify(t,v){c.strokeStyle=DIM;c.lineWidth=2;c.strokeRect(60,40,70,225);
+  for(let i=0;i<26;i++)C(68+h(i+9)*54,262-((h(i)+t*2.5)%1)*215,3+h(i+2)*3,OX);
+  TX('distillation',40,28,OX,12);LN(130,70,230,70,DIM);LN(230,70,230,100,DIM);
+  const w=6+t*16;[215,275].forEach(x=>RR(x-w/2,100,w,150,4,'#cfd6ee'));RR(215-w/2,96,60+w,w,4,'#cfd6ee');
+  for(let i=0;i<(9-v)*7;i++)C((i%2?215:275)+(h(i+40)-.5)*w,110+h(i+60)*135,2.5,'#8a4a2a');c.strokeStyle=DIM;c.strokeRect(185,84,120,182);if(v<9)TX('impurities',320,250,'#d08a5a',12);TX('Siemens reactor',185,28,INK,12);
+  TX('99.'+'9'.repeat(Math.max(v-2,0))+'%',350,130,INK,22);TX(v+'N polysilicon',350,156,DIM,13);
+  for(let i=0;i<12;i++)C(358+i*22,200,7,i<Math.round(v*t)?VIO:i<v?'#3a4380':'#1c2250');TX('one dot per nine',350,232,DIM,12)},
+pull(t,v){const w=cl(70/Math.sqrt(v),26,120),len=t*135;RR(205,205,230,75,10,'#39407a');R(217,212,206,60,MELT);
+  R(318,10,4,205-len-10,'#cfd6ee');if(len>2){const g=c.createLinearGradient(320-w/2,0,320+w/2,0);g.addColorStop(0,'#6f80ab');g.addColorStop(.5,'#e6ecff');g.addColorStop(1,'#6f80ab');
+    c.fillStyle=g;c.beginPath();c.moveTo(320,205-len-12);c.lineTo(320+w/2,205-len+10);c.lineTo(320+w/2,212);c.lineTo(320-w/2,212);c.lineTo(320-w/2,205-len+10);c.closePath();c.fill();
+    if(v>1.5)for(let i=0;i<5;i++){const y=210-len*h(i+1)*.9;LN(320-w/3,y,320+w/3,y-8,RED,1.5)}}
+  TX('seed crystal ↑ rotating',340,30,DIM,12);TX('melt 1,420 °C',450,250,MELT,12);
+  TX('pull '+v.toFixed(1)+' mm/min',20,28);TX('≈ '+Math.round(w/70*300)+' mm diameter',20,50,VIO,13)},
+slice(t,v){const g=c.createLinearGradient(0,115,0,195);g.addColorStop(0,'#6f80ab');g.addColorStop(.45,'#e6ecff');g.addColorStop(1,'#6f80ab');
+  RR(30,115,L(230,70,t),80,10,g);const rx=cl(v/775*5,2,8),gap=rx*2+8,n=Math.floor(t*Math.min(150/gap,14));
+  for(let i=0;i<n;i++){const x=290+i*gap;c.fillStyle='#cfd6ee';c.beginPath();c.ellipse(x,155,rx,40,0,0,7);c.fill();if(v<700&&i%2===0)LN(x-rx,128+h(i)*30,x+rx,150+h(i)*30,RED,2)}
+  if(t>0&&t<1)LN(30+L(230,70,t)+6,90,30+L(230,70,t)+6,220,'#ffd166',2);
+  TX('diamond wire saw',30,100,DIM,12);TX('thickness '+fmt(v)+' µm',30,28);
+  if(t>.4){const a=cl((t-.4)/.6);c.globalAlpha=a;let f='#b9c4e6';if(c.createConicGradient){f=c.createConicGradient(1,545,155);['#b9c4e6','#a98bff','#4fd0e8','#b9c4e6','#ff9ad5','#ffd166','#b9c4e6'].forEach((k,i)=>f.addColorStop(i/6,k))}
+    C(545,155,72,f);R(538,224,14,5,'#0e1233');c.globalAlpha=1;if(v<700){LN(495,115,560,165,RED,2.5);LN(560,165,535,220,RED,2.5);LN(560,165,605,140,RED,2.5)}TX(v<700?'cracked: too thin':v>850?'too thick: fewer per ingot':'polished 300 mm wafer',545,250,v<700?RED:DIM,12,'center')}},
+oxid(t,v){xsec(0,t,v);TX('O₂ at '+fmt(v)+' °C',70,40,OX,13);TX('SiO₂ oxide growing',570,170,OX,12,'right')},
+coat(t,v){xsec(1,t,v);TX('photoresist',70,40,RS,13);TX(fmt(v)+' rpm',570,40,INK,13,'right')},
+litho(t,v){xsec(2,t,v)},
+etch(t,v){xsec(3,t,v);TX(v+' s',570,30,INK,13,'right')},
+implant(t,v){xsec(4,t,v)},
+cmp(t,v){xsec(5,t,v);TX(v+' s',570,30,INK,13,'right')},
+metal(t,v){xsec(6,t,v)},
+sort(t){const ln=line(),k=.86,cx=165,cy=150,s=ln.m.s*k,n=ln.m.dies.length;C(cx,cy,150*k+2,'#262d66');
+  ln.m.dies.forEach((d,i)=>R(cx+d.x*k,cy+d.y*k,Math.max(s-1,1),Math.max(s-1,1),i/n<t?(d.ok?GRN:RED):'#4a54a0'));
+  TX(fmt(ln.N)+' dice per wafer',340,70,INK,16);TX('die '+ln.A+' mm² ('+ln.m.s.toFixed(1)+' mm square)',340,96,DIM,12);
+  TX('defect density D₀ = '+ln.D0.toFixed(2)+' /cm²',340,126,DIM,12);
+  {TX('yield '+(ln.G/Math.max(ln.N,1)*100).toFixed(0)+'%',340,170,GRN,22);TX(fmt(ln.G)+' good  ·  '+fmt(ln.N-ln.G)+' rejected',340,196,INK,13)}
+  R(340,226,12,12,GRN);TX('pass',358,237,DIM,12);R(410,226,12,12,RED);TX('fail',428,237,DIM,12)},
+dice(t,v){C(180,150,125,SI);c.save();c.beginPath();c.arc(180,150,125,0,7);c.clip();
+  for(let i=0;i<11;i++){if(i/11<t*2)LN(55+i*25,20,55+i*25,280,'#0e1233',3);if(i/11<t*2-1)LN(50,25+i*25,310,25+i*25,'#0e1233',3)}c.restore();
+  const th=L(775,v,cl(t*1.5)),hh=th/775*150;R(420,250-hh,150,hh,SI);LN(410,250,580,250,DIM);
+  if(v<50&&t>.5)for(let i=0;i<6;i++)LN(100+h(i)*150,70+h(i+5)*150,120+h(i+9)*150,90+h(i+3)*150,RED,2.5);TX(v<50?'dice cracking':v>100?'too thick for the package':'',495,275,RED,12,'center');TX('side view',420,60,DIM,12);TX(fmt(th)+' µm',495,250-hh-10,INK,15,'center');TX('back-grind, then saw along the lanes',20,292,DIM,12)},
+attach(t,v){pkg(0,t,v)},
+mold(t,v){pkg(1,t,vals[IDX.attach]<0?1:vals[IDX.attach],v)},
+test(t,v){RR(60,170,150,26,4,'#05060f');c.strokeStyle=DIM;c.strokeRect(60,170,150,26);for(let i=0;i<6;i++)C(75+i*24,204,7,'#cfd6ee');RR(40,212,190,18,4,'#39407a');TX('test socket',40,250,DIM,12);
+  const f=cl((v-25)/195);RR(270,60,16,180,8,'#262d66');RR(270,240-180*f*cl(t*2),16,180*f*cl(t*2),8,f>.75?RED:MELT);C(278,246,14,f>.75?RED:MELT);TX(v+' °C',300,70,INK,14);
+  c.strokeStyle=GRN;c.lineWidth=2;c.beginPath();for(let x=0;x<230*t;x++){const y=120+Math.sin(x*x/900)*28;x?c.lineTo(380+x,y):c.moveTo(380+x,y)}c.stroke();TX('speed test',380,70,DIM,12);
+  for(let i=0;i<8;i++)RR(380+i*29,190,22,22,4,i<Math.floor(t*8)?(v>140&&i%3===1?RED:v<110?'#fbbf24':GRN):'#262d66');TX(v<110?'weak chips slip through':v>140?'good chips damaged':'all corners pass',380,236,DIM,12);if(v>140){c.globalAlpha=cl((v-140)/80)*.8;RR(60,170,150,26,4,RED);c.globalAlpha=1}},
+smt(t,v){RR(40,50,340,210,10,v>255?'#6e5a2c':'#147a55');for(let i=0;i<9;i++)LN(60+i*36,60,60+i*36+((i%2)?30:-20),250,'#1faa77',1.5);
+  const y=L(-40,115,cl(t*2.2));RR(170,y,80,80,5,'#05060f');if(t>.45)TX('CHIP',210,160,DIM,12,'center');if(t>.5){for(let i=0;i<8;i++)C(175+i*10,y+85,3.5,v<235?'#6b7280':v>255?RED:'#f4f7ff');TX(v<235?'dull, cold joints':v>255?'scorched board':'shiny solder joints',210,246,INK,12,'center')}
+  for(let i=0;i<16;i++)if(i/16<t*1.4){const x=60+h(i+1)*290,yy=65+h(i+30)*170;if(x>150&&x<265&&yy>95&&yy<215)continue;RR(x,yy,i%3?16:26,i%3?8:14,2,i%3?'#e9c48a':'#39407a')}
+  const ax=430,ay=230,pw=180,ph=150,sc=d=>ay-(d-20)/300*ph;LN(ax,ay,ax+pw,ay,DIM,1);LN(ax,ay,ax,ay-ph,DIM,1);
+  c.setLineDash([4,4]);LN(ax,sc(217),ax+pw,sc(217),'#ffd166',1);c.setLineDash([]);TX('solder melts 217 °C',ax+pw,sc(217)-5,'#ffd166',11,'right');
+  const pts=[[0,25],[.3,150],[.55,180],[.75,v],[1,60]];c.strokeStyle=MELT;c.lineWidth=3;c.beginPath();c.moveTo(ax,sc(25));
+  for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i];if(t<=a[0])break;const u=cl((t-a[0])/(b[0]-a[0]));c.lineTo(ax+L(a[0],b[0],u)*pw,sc(L(a[1],b[1],u)))}c.stroke();
+  TX('reflow oven profile',ax,48,DIM,12);TX('peak '+v+' °C',ax,66,INK,13)},
+system(t){RR(250,20,140,260,18,'#39407a');const on=t>.85;let f='#05060f';if(on){f=c.createLinearGradient(260,30,380,270);f.addColorStop(0,'#ffb347');f.addColorStop(.5,'#a98bff');f.addColorStop(1,'#34d399')}
+  RR(260,32,120,236,10,f);if(on){TX('HELLO',320,150,'#0e1233',20,'center');TX('self-test passed',320,174,'#0e1233',11,'center')}
+  else{RR(280,146,80,8,4,'#262d66');RR(280,146,80*cl(t/.85),8,4,GRN);TX('flashing…',320,136,DIM,11,'center')}
+  ['bootloader','firmware','self-test'].forEach((s,i)=>{const d=t>(i+1)*.28;C(60,100+i*40,7,d?GRN:'#262d66');TX(s,78,105+i*40,d?INK:DIM,13)});
+  TX('housing · battery · display · sensors',420,150,DIM,11)}
+};
+function draw(){R(0,0,W,H,'#0e1233');const s=STEPS[cur];c.save();SCN[s.id](T,Math.max(vals[cur],0));c.restore()}
+
+/* ---------- build UI ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches, LAST=STEPS.length-1;
+function evaluate(){const s=STEPS[cur],k=s.ctl,v=vals[cur];
+  if(!k)return{q:1,cls:'good',head:'Your device works!',msg:'Bootloader, firmware and self-test are done. See your results below.'};
+  if(k.free){const l=line();return{q:1,cls:'good',head:`${fmt(l.G)} of ${fmt(l.N)} chips work`,msg:'Bigger chips mean fewer fit on the wafer, and more of them catch a defect. Try both ends of the slider.'}}
+  if(k.type==='choice'&&v<0)return{q:1,cls:'warn',head:'Pick one',msg:'Tap the option you think is right.',none:true};
+  const r=score(cur);
+  if(r.cls==='good'){r.head='Just right!';return r}
+  if(k.type==='choice'){r.head='Not this one. Try another.';r.cls='warn';return r}
+  r.head=v<k.ideal?'Go higher →':'← Go lower';r.cls='warn';return r}
+function renderDots(){$('#phases').innerHTML=STEPS.map((s,i)=>`<button class="st${res[i]&&res[i].cls==='good'?' good':''}" data-ph="${s.ph}" data-i="${i}" aria-current="${i===cur}" aria-label="Step ${i+1}: ${s.name}" title="${s.name}">${i+1}</button>`).join('')}
+function renderCtl(){const k=STEPS[cur].ctl,el=$('#ctl');let html='';
+  if(k&&k.type==='slider'){let zone='',zl='';
+    if(!k.free){const a=Math.max(0,(k.ideal-k.tol-k.min)/(k.max-k.min)*100),b=Math.min(100,(k.ideal+k.tol-k.min)/(k.max-k.min)*100);zone=`<div class="zone" style="left:${a-1.5}%;width:${b-a+3}%"></div>`;zl='<span class="zl">Slide the dot into the green zone and watch the picture change</span>'}
+    html=`<span class="lab">${k.label}</span><div class="val" id="kv"></div><div class="sl"><button class="pm" id="minus" aria-label="Lower">−</button>
+      <div class="track" id="track"><div class="rail">${zone}</div><input type="range" id="knob" aria-label="${k.label}" min="${k.min}" max="${k.max}" step="${k.step}" value="${vals[cur]}"></div>
+      <button class="pm" id="plus" aria-label="Higher">+</button></div>${zl}`}
+  if(k&&k.type==='choice')html=`<span class="lab">${k.label}</span><div class="opts">${k.opts.map((o,i)=>`<button class="opt${o.q>=.95?' right':''}" data-o="${i}" aria-pressed="${i===vals[cur]}">${o.l}</button>`).join('')}</div>`;
+  el.innerHTML=html;el.hidden=!k}
+function update(){t0=performance.now()+2500;const r=evaluate(),k=STEPS[cur].ctl,ok=r.cls==='good';res[cur]=r.none?null:r;
+  const kv=$('#kv');if(kv){kv.textContent=(k.step<1?vals[cur].toFixed(1):fmt(vals[cur]))+' '+k.unit;kv.classList.toggle('good',ok)}
+  const tr=$('#track');if(tr)tr.classList.toggle('good',ok);
+  $('#frame').classList.toggle('good',ok);$('#badge').hidden=!ok;
+  const st=$('#status');st.className='status'+(ok?' good':'');st.innerHTML=`<b>${ok&&k&&!k.free?'✓ ':''}${r.head}</b>${r.msg}`;
+  $('#next').classList.toggle('ready',ok);renderDots();if(cur===LAST)renderResults()}
+function renderInfo(){const s=STEPS[cur];$('#card').dataset.ph=s.ph;
+  $('#tag').textContent=`Step ${cur+1} of ${STEPS.length} · ${PH[s.ph].split(' · ')[1]}`;$('#name').textContent=s.name;$('#ask').textContent=s.tip;const w=$('#what');w.textContent=kid?s.kid:s.what;w.classList.toggle('kid',kid);$('#m-kid').setAttribute('aria-pressed',kid);$('#m-std').setAttribute('aria-pressed',!kid);
+  $('#info').innerHTML=`<b>${s.fact[0]}</b><span>${s.fact[1]}</span>`;
+  $('#back').disabled=cur===0;$('#next').hidden=cur===LAST;$('#results').hidden=cur!==LAST}
+function renderResults(){const l=line();
+  const cells=[['Chips on the wafer',l.N,'--p1'],['Pass the wafer test',l.G,'--p2'],['Packaged and tested',l.pk,'--p3'],['Working devices',l.dev,'--accent']];
+  $('#funnel').innerHTML=cells.map(x=>`<div class="fn" style="--c:var(${x[2]})"><b>${fmt(x[1])}</b><span>${x[0]}</span></div>`).join('');
+  const todo=STEPS.map((s,i)=>i).filter(i=>i!==LAST&&!(res[i]&&res[i].cls==='good'));
+  $('#fnote').textContent=todo.length?`${todo.length} steps are not green yet. Every step you fix means more working devices.`:'Every step is green. This is the most this wafer can give at this chip size.';
+  $('#fix').innerHTML=todo.map(i=>`<button class="ghost" data-i="${i}">Fix step ${i+1}</button>`).join('')}
+function go(i){cur=Math.max(0,Math.min(LAST,i));renderCtl();renderInfo();update();t0=performance.now()}
+function setVal(v){const k=STEPS[cur].ctl;vals[cur]=Math.max(k.min,Math.min(k.max,Math.round(v/k.step)*k.step));$('#knob').value=vals[cur];update()}
+$('#view-build').addEventListener('click',e=>{const t=e.target,b=t.closest('[data-i]'),o=t.closest('.opt');
+  if(b)return go(+b.dataset.i);
+  if(o){vals[cur]=+o.dataset.o;document.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',x===o));return update()}
+  if(t.id==='minus')setVal(vals[cur]-STEPS[cur].ctl.step);if(t.id==='plus')setVal(vals[cur]+STEPS[cur].ctl.step);
+  if(t.id==='m-kid'||t.id==='m-std'){kid=t.id==='m-kid';renderInfo()}
+  if(t.id==='next')go(cur+1);if(t.id==='back')go(cur-1)});
+$('#ctl').addEventListener('input',e=>{if(e.target.id==='knob'){vals[cur]=+e.target.value;update()}});
+let t0=0;function loop(now){if(!$('#view-build').hidden){T=RM||now<t0?1:Math.min(1,((now-t0)%4400)/3000);draw()}requestAnimationFrame(loop)}
+
+/* ---------- fab discrete-event simulation ---------- */
+function simulate(P,seed){const rnd=mulberry(seed);
+  const norm=(m,s)=>Math.max(.2,m+s*Math.sqrt(-2*Math.log(1-rnd()))*Math.cos(2*Math.PI*rnd())),expo=m=>-m*Math.log(1-rnd());
+  const res={},ev=[],lots=[],downs=[];let seq=0,now=0,done=0,chips=0,scrap=0;
+  ['euv','duv','etch','pack'].forEach(k=>res[k]={k,cap:P[k],down:0,busy:0,q:[],busyT:0,waitT:0});
+  const at=(t,fn)=>ev.push({t,s:seq++,fn});
+  function dispatch(r){while(r.q.length&&r.busy<r.cap-r.down){const j=r.q.shift();r.busy++;r.waitT+=now-j.t0;const d=j.dur();r.busyT+=d;j.lot.seg.push({k:j.label,a:now,b:now+d});at(now+d,()=>{r.busy--;j.cb();dispatch(r)})}}
+  const req=(r,lot,label,dur,cb)=>{r.q.push({lot,label,dur,cb,t0:now});dispatch(r)};
+  function layer(lot,i){if(i>=P.layers)return sort(lot);const crit=i<Math.min(P.crit,P.layers),r=crit?res.euv:res.duv;
+    req(r,lot,crit?'euv':'duv',()=>norm(crit?2:1.5,.2),()=>req(res.etch,lot,'etch',()=>norm(1,.15),()=>layer(lot,i+1)))}
+  function sort(lot){const fy=.88+.08*rnd();let good=0;for(let i=0;i<25;i++)if(rnd()<fy)good++;scrap+=25-good;
+    const dice=Math.floor(good*500*(.85+.1*rnd()));req(res.pack,lot,'pack',()=>dice/2000,()=>{lot.end=now;lot.dice=dice;chips+=dice;done++})}
+  function fail(r){at(now+expo(P.mtbf),()=>{if(done>=P.lots)return;r.down++;const d=expo(P.mttr);downs.push({k:r.k,a:now,b:now+d});at(now+d,()=>{r.down--;dispatch(r);fail(r)})})}
+  for(let i=0;i<P.lots;i++)at(i*P.interval,()=>{const lot={id:'LOT-'+String(i+1).padStart(2,'0'),arr:now,seg:[]};lots.push(lot);layer(lot,0)});
+  if(P.breaks)['euv','duv','etch'].forEach(k=>{for(let u=0;u<res[k].cap;u++)fail(res[k])});
+  let guard=0;while(ev.length&&done<P.lots&&guard++<200000){let m=0;for(let i=1;i<ev.length;i++)if(ev[i].t<ev[m].t||(ev[i].t===ev[m].t&&ev[i].s<ev[m].s))m=i;const e=ev.splice(m,1)[0];now=e.t;e.fn()}
+  const span=Math.max(...lots.map(l=>l.end||now),1);
+  return{lots,downs:downs.filter(d=>d.a<span).map(d=>({...d,b:Math.min(d.b,span)})),chips,scrap,span,res,
+    cycle:lots.reduce((a,l)=>a+((l.end||now)-l.arr),0)/lots.length}}
+
+const KN=[['euv','EUV scanners',1,4,1,1,''],['duv','DUV scanners',1,6,1,2,''],['etch','Etch tools',1,6,1,2,''],['pack','Packaging lines',1,4,1,1,''],
+  ['lots','Lots to start',2,14,1,8,''],['interval','Hours between lot starts',1,10,.5,3,' h'],['layers','Mask layers per wafer',2,12,1,6,''],['crit','Critical layers that need EUV',0,12,1,2,''],
+  ['mtbf','Mean time between failures',20,200,10,60,' h'],['mttr','Mean time to repair',2,24,1,6,' h']];
+const NAMES={euv:'EUV litho',duv:'DUV litho',etch:'Etch',pack:'Packaging'},COL={euv:'var(--p2)',duv:'var(--duv)',etch:'var(--p1)',pack:'var(--p3)'};
+let seed=42;
+$('#knobs').innerHTML='<h3>Fab settings</h3>'+KN.map((k,i)=>`${i===8?'<label class="chk"><input type="checkbox" id="f-breaks"> Random tool breakdowns</label>':''}
+  <div class="knob"><label for="f-${k[0]}">${k[1]}<output id="o-${k[0]}"></output></label><input type="range" id="f-${k[0]}" min="${k[2]}" max="${k[3]}" step="${k[4]}" value="${k[5]}"></div>`).join('')
+  +'<button class="ghost" id="reseed">Roll new random numbers</button><p class="note">Litho takes about 1.5 h per layer on DUV and 2 h on EUV. Etch takes about 1 h. Each layer sends the lot back through the same tools.</p>';
+function fab(){const P={breaks:$('#f-breaks').checked};KN.forEach(k=>{P[k[0]]=+$('#f-'+k[0]).value;$('#o-'+k[0]).textContent=P[k[0]]+k[6]});
+  const r=simulate(P,seed),pct=x=>(x/r.span*100).toFixed(2)+'%';
+  $('#fstats').innerHTML=[['Chips delivered',fmt(r.chips),'--p3'],['Wafers scrapped',r.scrap+' of '+P.lots*25,'--bad'],['Average cycle time',r.cycle.toFixed(1)+' h','--p2'],['Chips per day',fmt(r.chips/r.span*24),'--p1']]
+    .map(x=>`<div class="fn" style="--c:var(${x[2]})"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+  const keys=['euv','duv','etch','pack'];
+  $('#util').innerHTML='<span></span><span class="note">busy share of the run</span><span></span><span class="note">total queue</span>'+keys.map(k=>{const x=r.res[k],u=Math.min(100,x.busyT/(x.cap*r.span)*100);
+    return`<span>${NAMES[k]} ×${x.cap}</span><div class="bar"><i style="width:${u}%;--c:${COL[k]}"></i></div><span class="num">${u.toFixed(0)}%</span><span class="num">${x.waitT.toFixed(1)} h</span>`}).join('');
+  const worst=keys.reduce((a,k)=>r.res[k].waitT>r.res[a].waitT?k:a,'euv'),w=r.res[worst].waitT;
+  $('#insight').textContent=w<P.lots*.5?'No real bottleneck. Tools are sitting idle waiting for wafers, so you could start lots more often or run with fewer tools.'
+    :`The bottleneck is ${NAMES[worst]}: lots queued there for ${w.toFixed(0)} hours in total. Add a tool there or start lots less often. Adding tools anywhere else will not help much.`;
+  let g=r.lots.map(l=>`<span>${l.id}</span><div class="trk" title="${l.id}: ${fmt(l.dice||0)} chips, ${((l.end||r.span)-l.arr).toFixed(1)} h cycle time"><span class="life" style="left:${pct(l.arr)};width:${pct((l.end||r.span)-l.arr)}"></span>${
+    l.seg.map(s=>`<span style="left:${pct(s.a)};width:${pct(s.b-s.a)};background:${COL[s.k]}"></span>`).join('')}</div>`).join('');
+  if(P.breaks)g+=`<span>down</span><div class="trk">${r.downs.map(d=>`<span title="${NAMES[d.k]} tool down" style="left:${pct(d.a)};width:${pct(d.b-d.a)};background:var(--bad);opacity:.8"></span>`).join('')}</div>`;
+  g+=`<span></span><div style="display:flex;justify-content:space-between;color:var(--muted)"><span>0</span><span>${(r.span/2).toFixed(0)}</span><span>${r.span.toFixed(0)} h</span></div>`;
+  $('#gantt').innerHTML=g}
+$('#knobs').addEventListener('input',fab);$('#knobs').addEventListener('click',e=>{if(e.target.id==='reseed'){seed=(Math.random()*1e9)|0;fab()}});
+
+/* ---------- industry map ---------- */
+const MAP=[
+['Chip designers (fabless)','--accent','Design chips and sell them under their own name. They own no factories.','Nvidia · Apple · AMD · Qualcomm · Broadcom · MediaTek',null],
+['Design software and IP','--duv','Sell the software used to lay out billions of transistors, and ready-made building blocks such as processor cores.','Synopsys · Cadence · Siemens EDA · Arm',null],
+['Materials','--p1','Sell wafers, gases, resists, slurries and substrates. Japan is especially strong here.','Shin-Etsu · SUMCO · JSR · Entegris · Wacker · Ibiden','pull'],
+['Equipment makers','--p2','Build the machines every fab needs. A handful of firms dominate each tool type, and ASML alone makes EUV scanners.','ASML · Applied Materials · Lam Research · Tokyo Electron · KLA','litho'],
+['Foundries','--p2','Manufacture chips designed by others. This is where the 400 to 1,000+ step front-end process runs.','TSMC · Samsung Foundry · GlobalFoundries · UMC · SMIC','oxid'],
+['Integrated manufacturers (IDMs)','--bad','Design and manufacture their own chips. Common in memory, analog and power.','Intel · Samsung · Micron · SK hynix · Texas Instruments · Infineon','sort'],
+['Packaging and test (OSATs)','--p3','Cut wafers into dice, package them and run final test. Advanced packaging is now as strategic as the fab.','ASE · Amkor · JCET · Advantest · Teradyne','attach'],
+['Board and system assembly','--p3','Solder chips onto circuit boards and build the finished product for the brand.','Foxconn · Pegatron · Jabil · Flex','smt']];
+$('#map').innerHTML=MAP.map(m=>`<div class="panel seg" style="--c:var(${m[1]})"><h2>${m[0]}</h2><p>${m[2]}</p><p class="cos">${m[3]}</p>${m[4]?`<button class="ghost" data-j="${m[4]}">See it in the simulator →</button>`:''}</div>`).join('');
+$('#map').addEventListener('click',e=>{const j=e.target.dataset.j;if(j){tab('build');go(IDX[j]);$('#card').scrollIntoView({block:'start'})}});
+
+function tab(t){['build','fab','map'].forEach(k=>{$('#view-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-pressed',k===t)});$('.wrap').style.maxWidth=t==='build'?'':'1120px';if(t==='build')fit()}
+['build','fab','map'].forEach(k=>$('#tab-'+k).addEventListener('click',()=>tab(k)));
+addEventListener('resize',fit);
+fit();go(0);fab();requestAnimationFrame(loop);
+</script>
+
+</body></html>
