@@ -25,14 +25,7 @@ export default function SandToSiliconPage() {
           <span className="text-xl font-bold text-amber-700">T</span>
           <span className="font-semibold text-gray-800 text-sm">Tappydo</span>
         </div>
-        <a
-          href="https://github.com/karanguptak9/simulator-learnSemiconductor"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm bg-amber-700 text-white px-4 py-1.5 rounded-lg font-medium hover:bg-amber-800 transition"
-        >
-          View code
-        </a>
+        <span className="w-20" aria-hidden="true" />
       </div>
 
       {/* Intro */}
