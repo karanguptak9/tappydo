@@ -80,7 +80,9 @@ export default function Projects() {
             <a
               key={index}
               href={project.link}
-              className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+              aria-disabled={project.cta ? undefined : true}
+              onClick={project.cta ? undefined : (e) => e.preventDefault()}
+              className={`group bg-white rounded-xl shadow-md transition-shadow duration-300 overflow-hidden ${project.cta ? 'hover:shadow-xl' : 'cursor-default'}`}
             >
               {/* Project Image */}
               <div className="h-48 bg-gradient-to-br from-amber-200 to-amber-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -116,8 +118,8 @@ export default function Projects() {
                     </span>
                   </div>
                 ) : (
-                  <div className="mt-4 text-amber-700 font-semibold text-sm group-hover:translate-x-2 transition-transform">
-                    Learn more →
+                  <div className="mt-4 text-gray-400 font-semibold text-sm">
+                    Disabled
                   </div>
                 )}
               </div>
