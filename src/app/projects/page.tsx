@@ -13,7 +13,7 @@ export default function Projects() {
     },
     {
       title: "Tridosha: Ayurvedic Wellness Tracker",
-      description: "Tracks your Ayurvedic baseline and current state separately, then suggests foods, spices and recipes that fit your diet and allergies. Multiple profiles, no sign-up, built on Supabase.",
+      description: "Tracks your Ayurvedic baseline and current state separately, then suggests foods, spices and recipes that fit your diet and allergies. Accounts with multiple profiles, built on Supabase.",
       image: "🌿",
       tags: ["JavaScript", "Supabase", "Ayurveda", "Nutrition"],
       link: "/projects/tridosha",

@@ -33,8 +33,8 @@ export default function TridoshaPage() {
         <p className="text-lg text-gray-600 mb-6">
           Ayurveda separates the constitution you were born with from how you are this week. I built
           a tracker that keeps the two apart, then uses both to suggest foods, spices and recipes
-          that fit your diet and allergies. No sign-up needed: add a profile for each person and start
-          with the questionnaire.
+          that fit your diet and allergies. Create an account, add a profile for each person, and
+          start with the questionnaire.
         </p>
         <div className="flex flex-wrap gap-2 justify-center mb-6">
           {tags.map((tag) => (
