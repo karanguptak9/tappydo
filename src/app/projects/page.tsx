@@ -12,6 +12,14 @@ export default function Projects() {
       cta: "Open Simulator"
     },
     {
+      title: "Tridosha: Ayurvedic Wellness Tracker",
+      description: "Tracks your Ayurvedic baseline and current state separately, then suggests foods, spices and recipes that fit your diet and allergies. Accounts with multiple profiles, built on Supabase.",
+      image: "🌿",
+      tags: ["JavaScript", "Supabase", "Ayurveda", "Nutrition"],
+      link: "/projects/tridosha",
+      cta: "Open App"
+    },
+    {
       title: "Automated Task Manager",
       description: "A smart task manager that automatically categorizes your tasks using keyword detection. Built with Next.js, React, and Supabase.",
       image: "✅",
