@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export default function SimulatorFrame() {
+type Props = { src?: string; title?: string };
+
+export default function SimulatorFrame({
+  src = '/sand-to-silicon.html',
+  title = 'Sand to Silicon chip-making simulator',
+}: Props) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(1400);
 
@@ -21,8 +26,8 @@ export default function SimulatorFrame() {
   return (
     <iframe
       ref={frameRef}
-      src="/sand-to-silicon.html"
-      title="Sand to Silicon chip-making simulator"
+      src={src}
+      title={title}
       onLoad={measure}
       scrolling="no"
       style={{ height }}

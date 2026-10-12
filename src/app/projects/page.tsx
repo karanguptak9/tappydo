@@ -12,6 +12,14 @@ export default function Projects() {
       cta: "Open Simulator"
     },
     {
+      title: "Silicon to Remote: TV Remote Simulator",
+      description: "Part 2 of Sand to Silicon. Follow one TV remote button press from the batteries to the TV turning on, then use a working remote. Includes a kid-friendly mode.",
+      image: "📺",
+      tags: ["JavaScript", "Canvas", "Simulation", "Electronics"],
+      link: "/projects/silicon-to-remote",
+      cta: "Open Simulator"
+    },
+    {
       title: "Tridosha: Ayurvedic Wellness Tracker",
       description: "Tracks your Ayurvedic baseline and current state separately, then suggests foods, spices and recipes that fit your diet and allergies. Accounts with multiple profiles, built on Supabase.",
       image: "🌿",
