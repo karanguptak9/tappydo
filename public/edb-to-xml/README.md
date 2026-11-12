@@ -8,7 +8,7 @@ Files behind `/projects/edb-to-xml`. The page itself is `public/edb-to-xml.html`
 - `pylib.zip` is the Python code the worker runs:
   - `edb2xml.py`, the converter script.
   - `dissect.esedb`, `dissect.cstruct` and `dissect.util` (pure-Python files only), the
-    ESE database parser by Fox-IT, unmodified, licensed AGPL-3.0.
+    ESE database parser by Fox-IT, unmodified, licensed Apache-2.0.
     Source: https://github.com/fox-it/dissect.esedb
 
 To update the converter, edit `edb2xml.py`, then rebuild `pylib.zip` with `edb2xml.py` and
