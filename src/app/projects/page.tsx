@@ -36,6 +36,14 @@ export default function Projects() {
       cta: "Open App"
     },
     {
+      title: "EDB & SDB to XML Converter",
+      description: "Converts Windows .edb and .sdb database files to XML in the browser. The file is read on your device and is never uploaded.",
+      image: "🗄️",
+      tags: ["Python", "WebAssembly", "Windows", "Forensics"],
+      link: "/projects/edb-to-xml",
+      cta: "Open Tool"
+    },
+    {
       title: "Manufacturing Automation Framework",
       description: "Python/SQL automation scripts for factory software systems. Improved issue detection and reduced downtime by ~30% through data-driven diagnostics.",
       image: "🏭",
