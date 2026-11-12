@@ -27,7 +27,7 @@ function boot() {
 }
 
 const RUN = `
-import sys, zipfile, edb2xml
+import os, shutil, sys, zipfile, edb2xml
 sys.argv = list(ARGV)
 ERR = None
 try:
@@ -42,6 +42,11 @@ except Exception as exc:
 if ERR is None:
     with zipfile.ZipFile("/out/out.zip", "w", zipfile.ZIP_DEFLATED) as z:
         z.write("/out/out.xml", arcname=XMLNAME)
+        if os.path.isdir("/out/images"):
+            for name in sorted(os.listdir("/out/images")):
+                # PNG and JPEG data is already compressed
+                z.write("/out/images/" + name, arcname="images/" + name, compress_type=zipfile.ZIP_STORED)
+shutil.rmtree("/out/images", ignore_errors=True)
 ERR
 `;
 
@@ -59,6 +64,7 @@ async function convert(msg) {
     if (o.skipSystem) argv.push("--skip-system");
     if (o.includeNulls) argv.push("--include-nulls");
     if (o.allTags) argv.push("--all-tags");
+    if (o.images) argv.push("--images", "/out/images");
     if (o.maxRows > 0) argv.push("--max-rows", String(o.maxRows));
     pyodide.globals.set("ARGV", pyodide.toPy(argv));
     pyodide.globals.set("XMLNAME", msg.xmlName);

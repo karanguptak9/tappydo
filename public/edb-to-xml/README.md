@@ -6,7 +6,10 @@ Files behind `/projects/edb-to-xml`. The page itself is `public/edb-to-xml.html`
   WebAssembly), loaded from the jsDelivr CDN at a pinned version. The chosen file is read
   locally and never leaves the browser.
 - `pylib.zip` is the Python code the worker runs:
-  - `edb2xml.py`, the converter script.
+  - `edb2xml.py`, the converter script. It reads Heidelberg HEYEX / Spectralis files
+    (.sdb, .edb, .pdb, .E2E), Windows ESE databases and Windows compatibility databases.
+    The Heidelberg reader follows the reverse-engineered format notes from the eyepy,
+    OCT-Converter and LibE2E projects; it has been tested on synthetic files only.
   - `dissect.esedb`, `dissect.cstruct` and `dissect.util` (pure-Python files only), the
     ESE database parser by Fox-IT, unmodified, licensed Apache-2.0.
     Source: https://github.com/fox-it/dissect.esedb
