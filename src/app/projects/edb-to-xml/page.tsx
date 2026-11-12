@@ -3,12 +3,12 @@ import Link from 'next/link';
 import SimulatorFrame from '../sand-to-silicon/SimulatorFrame';
 
 export const metadata: Metadata = {
-  title: 'EDB & SDB to XML - Windows Database Converter | Karan Gupta',
+  title: 'EDB & SDB to XML - Heidelberg Eye-Scan File Converter | Karan Gupta',
   description:
-    'Convert Windows .edb and .sdb database files to XML in your browser. The file is read on your device and is not uploaded.',
+    'Convert Heidelberg HEYEX and Spectralis eye-scan files (.sdb, .edb, .pdb, .E2E) to XML and images in your browser. The file is read on your device and is not uploaded.',
 };
 
-const tags = ['Python', 'WebAssembly', 'Windows', 'Forensics'];
+const tags = ['Python', 'WebAssembly', 'OCT', 'Medical Imaging'];
 
 export default function EdbToXmlPage() {
   return (
@@ -32,9 +32,10 @@ export default function EdbToXmlPage() {
       <div className="max-w-3xl mx-auto px-6 pt-12 pb-6 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">EDB &amp; SDB to XML</h1>
         <p className="text-lg text-gray-600 mb-6">
-          Convert a Windows database file to XML: Windows Search, SRUM and other .edb files, the
-          security database, and application compatibility .sdb files. The file is read on your
-          device and is not uploaded anywhere.
+          Convert Heidelberg eye-scan files to XML. It reads the .sdb, .edb, .pdb and .E2E files
+          written by HEYEX and Spectralis OCT devices, and saves the scan images alongside. Windows
+          .edb and .sdb databases work too. The file is read on your device and is not uploaded
+          anywhere.
         </p>
         <div className="flex flex-wrap gap-2 justify-center">
           {tags.map((tag) => (

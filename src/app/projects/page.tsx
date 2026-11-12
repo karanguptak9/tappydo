@@ -37,9 +37,9 @@ export default function Projects() {
     },
     {
       title: "EDB & SDB to XML Converter",
-      description: "Converts Windows .edb and .sdb database files to XML in the browser. The file is read on your device and is never uploaded.",
+      description: "Converts Heidelberg HEYEX and Spectralis eye-scan files (.sdb, .edb, .pdb, .E2E) to XML and images in the browser. Also reads Windows .edb and .sdb databases. The file is read on your device and is never uploaded.",
       image: "🗄️",
-      tags: ["Python", "WebAssembly", "Windows", "Forensics"],
+      tags: ["Python", "WebAssembly", "OCT", "Medical Imaging"],
       link: "/projects/edb-to-xml",
       cta: "Open Tool"
     },
