@@ -81,6 +81,9 @@ pre.xml {
   font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--fg); tab-size: 2;
 }
 pre.xml .t { color: var(--tag); } pre.xml .a { color: var(--attr); }
+#pick-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 0.9rem; }
+#pick-wrap[hidden], #notes[hidden] { display: none; }
+#pick { max-width: 100%; }
 ul.limits { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; max-width: 68ch; }
 </style>
 </head>
@@ -88,10 +91,10 @@ ul.limits { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.9r
 
 <main class="wrap">
   <label class="drop" id="drop" for="file">
-    <input type="file" id="file">
-    <strong>Choose a file</strong>
-    <span>or drop it here</span>
-    <span class="sig">Heidelberg .sdb · .edb · .pdb · .E2E &nbsp;|&nbsp; Windows .edb · .sdb</span>
+    <input type="file" id="file" multiple>
+    <strong>Choose files</strong>
+    <span>or drop them here</span>
+    <span class="sig">Heidelberg scan: select its .pdb, .edb and .sdb files together &nbsp;|&nbsp; Windows .edb · .sdb</span>
   </label>
 
   <div class="under">
@@ -104,7 +107,8 @@ ul.limits { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.9r
           <input type="number" id="opt-maxrows" min="1" inputmode="numeric" placeholder="all rows"></label>
         <label for="opt-skipsys"><input type="checkbox" id="opt-skipsys" checked> Skip internal system tables (Windows)</label>
         <label for="opt-nulls"><input type="checkbox" id="opt-nulls"> Write empty columns (Windows)</label>
-        <label for="opt-images"><input type="checkbox" id="opt-images" checked> Add scan images to the .zip (Heidelberg)</label>
+        <label for="opt-dump"><input type="checkbox" id="opt-dump"> Heidelberg: write every raw record of one file instead of the scan report</label>
+        <label for="opt-images"><input type="checkbox" id="opt-images" checked> Add scan images to the .zip (raw record mode)</label>
         <label for="opt-alltags"><input type="checkbox" id="opt-alltags"> Include string table (sysmain.sdb type)</label>
       </div>
     </details>
@@ -122,8 +126,12 @@ ul.limits { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.9r
 
     <div id="result" hidden style="display:contents">
       <div class="stats" id="stats"></div>
+      <label class="stack" id="pick-wrap" for="pick" hidden><span>Series in these files</span>
+        <select id="pick"></select></label>
+      <ul class="limits" id="notes" hidden></ul>
       <div class="actions">
         <button type="button" class="primary" id="save-xml">Download XML</button>
+        <button type="button" class="primary" id="save-pdf" hidden>Download PDF</button>
         <button type="button" id="save-zip">Download as .zip</button>
         <button type="button" id="copy">Copy XML</button>
       </div>
@@ -135,34 +143,44 @@ ul.limits { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.9r
 
   <section class="panel" id="example">
     <div><p class="label">Example output</p>
-    <h2 style="margin-top:4px">What the XML looks like</h2></div>
-    <pre class="xml" tabindex="0"><span class="t">&lt;heyex</span> <span class="a">source</span>="scan.sdb" <span class="a">format</span>="heidelberg"<span class="t">&gt;</span>
-  <span class="t">&lt;patient</span> <span class="a">id</span>="321"<span class="t">&gt;</span>
-    <span class="t">&lt;record</span> <span class="a">type</span>="9" <span class="a">name</span>="patient"<span class="t">&gt;</span>
-      <span class="t">&lt;field</span> <span class="a">name</span>="surname"<span class="t">&gt;</span>Sample<span class="t">&lt;/field&gt;</span>
-    <span class="t">&lt;/record&gt;</span>
-    <span class="t">&lt;study</span> <span class="a">id</span>="1234"<span class="t">&gt;</span>
-      <span class="t">&lt;series</span> <span class="a">id</span>="50001"<span class="t">&gt;</span>
-        <span class="t">&lt;record</span> <span class="a">type</span>="9006" <span class="a">name</span>="scan_pattern"<span class="t">&gt;</span>
-          <span class="t">&lt;field</span> <span class="a">name</span>="text"<span class="t">&gt;</span>OCT ART Volume<span class="t">&lt;/field&gt;</span>
-        <span class="t">&lt;/record&gt;</span>
-        <span class="t">&lt;slice</span> <span class="a">id</span>="0"<span class="t">&gt;</span>
-          <span class="t">&lt;record</span> <span class="a">type</span>="1073741824" <span class="a">name</span>="image"<span class="t">&gt;</span>
-            <span class="t">&lt;field</span> <span class="a">name</span>="kind"<span class="t">&gt;</span>bscan<span class="t">&lt;/field&gt;</span>
-            <span class="t">&lt;field</span> <span class="a">name</span>="file"<span class="t">&gt;</span>scan_321_1234_50001_0_bscan.png<span class="t">&lt;/field&gt;</span>
-          <span class="t">&lt;/record&gt;</span>
-        <span class="t">&lt;/slice&gt;</span>
-      <span class="t">&lt;/series&gt;</span>
-    <span class="t">&lt;/study&gt;</span>
-  <span class="t">&lt;/patient&gt;</span>
-<span class="t">&lt;/heyex&gt;</span></pre>
+    <h2 style="margin-top:4px">What the scan report looks like</h2></div>
+    <pre class="xml" tabindex="0"><span class="t">&lt;HEDX&gt;</span>
+<span class="t">&lt;BODY&gt;</span>
+<span class="t">&lt;Patient&gt;</span>
+<span class="t">&lt;ID&gt;</span>321<span class="t">&lt;/ID&gt;</span>
+<span class="t">&lt;LastName&gt;</span>Sample<span class="t">&lt;/LastName&gt;</span>
+<span class="t">&lt;Study&gt;</span>
+<span class="t">&lt;ID&gt;</span>1234<span class="t">&lt;/ID&gt;</span>
+<span class="t">&lt;Series&gt;</span>
+<span class="t">&lt;ID&gt;</span>50001<span class="t">&lt;/ID&gt;</span>
+<span class="t">&lt;Laterality&gt;</span>R<span class="t">&lt;/Laterality&gt;</span>
+<span class="t">&lt;ThicknessGrid&gt;</span>
+<span class="t">&lt;Name&gt;</span>1, 3, 6 mm ETDRS<span class="t">&lt;/Name&gt;</span>
+<span class="t">&lt;CentralThickness&gt;</span>0.251<span class="t">&lt;/CentralThickness&gt;</span>
+<span class="t">&lt;TotalVolume&gt;</span>8.640<span class="t">&lt;/TotalVolume&gt;</span>
+<span class="t">&lt;Zone&gt;</span>
+<span class="t">&lt;Name&gt;</span>C0<span class="t">&lt;/Name&gt;</span>
+<span class="t">&lt;AvgThickness&gt;</span>0.272<span class="t">&lt;/AvgThickness&gt;</span>
+<span class="t">&lt;Volume&gt;</span>0.214<span class="t">&lt;/Volume&gt;</span>
+<span class="t">&lt;ValidPixelPercentage&gt;</span>100.000<span class="t">&lt;/ValidPixelPercentage&gt;</span>
+<span class="t">&lt;/Zone&gt;</span>
+…
+<span class="t">&lt;/ThicknessGrid&gt;</span>
+<span class="t">&lt;NumImages&gt;</span>26<span class="t">&lt;/NumImages&gt;</span>
+…
+<span class="t">&lt;/Series&gt;</span>
+<span class="t">&lt;/Study&gt;</span>
+<span class="t">&lt;/Patient&gt;</span>
+<span class="t">&lt;/BODY&gt;</span>
+<span class="t">&lt;/HEDX&gt;</span></pre>
     <ul class="limits">
-      <li>Heidelberg files hold patient data. Treat the XML and images as you would the original file.</li>
-      <li>Records are grouped by patient, study, series and slice. Scan images are saved as PNG files in the .zip.</li>
-      <li>Heidelberg does not document this format, so the reader is based on open-source research. Record types it does not understand are kept as raw bytes.</li>
+      <li>Heidelberg files hold patient data. Treat the XML and PDF as you would the original files. Nothing is uploaded; the conversion runs in your browser.</li>
+      <li>For a Heidelberg scan, select the .pdb (patient), .edb (study: scan details and layer lines) and .sdb (pictures) together. You get one XML and one PDF per series. The .edb is needed for the Thickness Grid.</li>
+      <li>The Thickness Grid (1, 3, 6 mm ETDRS) is recomputed from the ILM and BM layer lines. On the test scan it matched the Heidelberg export to within 0.001 mm. It assumes a standard lateral scale, so check it against your own export before relying on it.</li>
+      <li>Some fields of the Heidelberg export are not in these files (database UIDs, exported image paths) and are left out.</li>
+      <li>Heidelberg does not document this format, so the reader is based on open-source research.</li>
       <li>Windows databases (Windows Search, SRUM, sysmain.sdb) are converted too. The file type is detected from its contents.</li>
       <li>The first conversion fetches the converter (about 6 MB); later ones start straight away.</li>
-      <li>Very large databases (several hundred MB) may run out of memory on a phone. Use a row limit, or a computer.</li>
     </ul>
   </section>
 </main>
@@ -177,7 +195,7 @@ const el = { work: $("work"), fname: $("fname"), kind: $("kind"), busy: $("busy"
 const PREVIEW_CHARS = 40000;
 const COPY_LIMIT = 8 * 1024 * 1024;
 let worker = null, running = false, engineLoaded = false;
-let out = null;          // { xml: Blob, zip: Blob, base: string, text: string|null }
+let out = null;          // { xml: Blob, zip: Blob, base: string, text: string|null, reports?, pdf? }
 let logLines = [];
 
 function fmtBytes(n) {
@@ -235,16 +253,61 @@ function onWorker(msg) {
   } else if (msg.type === "done") {
     running = false;
     finish(msg);
+  } else if (msg.type === "report") {
+    running = false;
+    finishReport(msg);
   }
+}
+
+async function showReport(i) {
+  const r = out.reports[i];
+  out.xml = r.xml; out.pdf = r.pdf; out.base = r.name; out.text = null;
+  const head = await r.xml.slice(0, PREVIEW_CHARS).text();
+  if (r.xml.size <= COPY_LIMIT) out.text = await r.xml.text();
+  el.stats.replaceChildren(
+    stat("Series", String(r.series)), stat("Images", String(r.images)),
+    stat("Thickness Grid", r.grid ? "Yes" : "No"), stat("XML size", fmtBytes(r.xml.size)));
+  const notes = $("notes");
+  notes.replaceChildren(...r.notes.map((n) => { const li = document.createElement("li"); li.textContent = n; return li; }));
+  notes.hidden = r.notes.length === 0;
+  const cut = head.length < PREVIEW_CHARS ? head : head.slice(0, head.lastIndexOf("\n") + 1);
+  el.preview.innerHTML = highlight(cut);
+  el.previewnote.textContent = r.xml.size > cut.length
+    ? "Preview shows the start of the file. Download it to get everything." : "";
+  $("copy").hidden = out.text === null;
+}
+
+async function finishReport(msg) {
+  out = { reports: msg.reports, zip: msg.zip, zipBase: msg.reports.length === 1 ? msg.reports[0].name : "heidelberg_scan_reports" };
+  el.kind.textContent = "Heidelberg scan report";
+  el.kind.hidden = false;
+  const pick = $("pick");
+  pick.replaceChildren(...msg.reports.map((r, i) => {
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = "Series " + r.series + " · " + r.images + " images" + (r.grid ? " · Thickness Grid" : "");
+    return o;
+  }));
+  $("pick-wrap").hidden = msg.reports.length < 2;
+  $("save-pdf").hidden = false;
+  await showReport(0);
+  el.savemsg.className = "note";
+  el.savemsg.textContent = msg.reports.length > 1
+    ? "The .zip holds the XML and PDF of all " + msg.reports.length + " series." : "The .zip holds the XML and the PDF.";
+  el.busy.hidden = true;
+  el.log.hidden = true;
+  el.result.hidden = false;
+  el.example.hidden = true;
 }
 
 async function finish(msg) {
   out = { xml: msg.xml, zip: msg.zip, base: out.base, text: null };
+  $("pick-wrap").hidden = true; $("notes").hidden = true; $("save-pdf").hidden = true;
   const head = await msg.xml.slice(0, PREVIEW_CHARS).text();
   if (msg.xml.size <= COPY_LIMIT) out.text = await msg.xml.text();
 
   const summary = logLines.slice().reverse().find((l) => /^Wrote /.test(l)) || "";
-  const root = (head.match(/^<\?xml[^>]*>\s*<(\w+)/) || [])[1];
+  const root = (head.match(/^(?:<\?xml[^>]*>\s*)?<(\w+)/) || [])[1];
   el.kind.textContent = root === "heyex" ? "Heidelberg eye-scan file"
     : root === "sdb" ? "Windows compatibility database" : "Windows ESE database";
   el.kind.hidden = false;
@@ -275,27 +338,19 @@ async function finish(msg) {
   el.example.hidden = true;
 }
 
-function start(file, name) {
-  if (running) return;
+function begin(label) {
   running = true;
   logLines = [];
-  const base = (name.replace(/\.[^.]*$/, "") || "database").replace(/[\/\\]/g, "_");
-  out = { base };
   el.work.hidden = false;
-  el.fname.textContent = name + "  ·  " + fmtBytes(file.size);
+  el.fname.textContent = label;
   el.kind.hidden = true; el.error.hidden = true; el.result.hidden = true;
   el.log.hidden = true; el.log.textContent = "";
   el.busy.hidden = false;
   el.stage.textContent = engineLoaded ? "Converting…" : "Loading the converter (first time only)…";
-  const maxRows = parseInt($("opt-maxrows").value, 10);
+}
+function post(message) {
   try {
-    getWorker().postMessage({
-      file, name, xmlName: base + ".xml",
-      opts: { binary: $("opt-binary").value, skipSystem: $("opt-skipsys").checked,
-        includeNulls: $("opt-nulls").checked, allTags: $("opt-alltags").checked,
-        images: $("opt-images").checked,
-        maxRows: maxRows > 0 ? maxRows : 0 },
-    });
+    getWorker().postMessage(message);
   } catch (err) {
     running = false;
     showError("The converter could not start in this view. Check your connection and try again.");
@@ -303,17 +358,51 @@ function start(file, name) {
   el.work.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
+function start(file, name) {
+  if (running) return;
+  const base = (name.replace(/\.[^.]*$/, "") || "database").replace(/[\/\\]/g, "_");
+  out = { base };
+  begin(name + "  ·  " + fmtBytes(file.size));
+  const maxRows = parseInt($("opt-maxrows").value, 10);
+  post({
+    file, name, xmlName: base + ".xml",
+    opts: { binary: $("opt-binary").value, skipSystem: $("opt-skipsys").checked,
+      includeNulls: $("opt-nulls").checked, allTags: $("opt-alltags").checked,
+      images: $("opt-images").checked,
+      maxRows: maxRows > 0 ? maxRows : 0 },
+  });
+}
+
+async function isHeidelberg(file) {
+  try {
+    const b = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+    return b[0] === 0x43 && b[1] === 0x4d && b[2] === 0x44 && b[3] === 0x62;   // "CMDb"
+  } catch (e) { return false; }
+}
+
+/* Several Heidelberg files -> one scan report; anything else -> one file at a time. */
+async function startFiles(list) {
+  const files = Array.from(list || []);
+  if (!files.length || running) return;
+  const flags = await Promise.all(files.map(isHeidelberg));
+  const scan = files.filter((f, i) => flags[i]);
+  if (!scan.length || $("opt-dump").checked) { start(files[0], files[0].name); return; }
+  if (running) return;
+  out = {};
+  const total = scan.reduce((n, f) => n + f.size, 0);
+  begin((scan.length === 1 ? scan[0].name : scan.length + " Heidelberg files") + "  ·  " + fmtBytes(total));
+  post({ mode: "report", files: scan.map((f) => ({ name: f.name, file: f })) });
+}
+
 el.file.addEventListener("change", () => {
-  const f = el.file.files[0];
-  if (f) start(f, f.name);
-  el.file.value = "";
+  startFiles(el.file.files).finally(() => { el.file.value = ""; });
 });
 ["dragenter", "dragover"].forEach((t) => el.drop.addEventListener(t, (e) => { e.preventDefault(); el.drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach((t) => el.drop.addEventListener(t, (e) => { e.preventDefault(); el.drop.classList.remove("over"); }));
 el.drop.addEventListener("drop", (e) => {
-  const f = e.dataTransfer && e.dataTransfer.files[0];
-  if (f) start(f, f.name);
+  if (e.dataTransfer) startFiles(e.dataTransfer.files);
 });
+$("pick").addEventListener("change", () => { if (out && out.reports) showReport(Number($("pick").value)); });
 $("try-sample").addEventListener("click", () => {
   const bin = atob(SAMPLE_B64);
   const bytes = new Uint8Array(bin.length);
@@ -323,8 +412,10 @@ $("try-sample").addEventListener("click", () => {
 
 function save(kind) {
   if (!out || !out.xml) return;
-  const blob = kind === "zip" ? out.zip : new Blob([out.xml], { type: "application/xml" });
-  const name = out.base + (kind === "zip" ? ".xml.zip" : ".xml");
+  const blob = kind === "zip" ? out.zip : kind === "pdf" ? out.pdf : new Blob([out.xml], { type: "application/xml" });
+  if (!blob) return;
+  const name = kind === "zip" ? (out.zipBase ? out.zipBase + ".zip" : out.base + ".xml.zip")
+    : out.base + (kind === "pdf" ? ".pdf" : ".xml");
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = name;
@@ -334,6 +425,7 @@ function save(kind) {
   el.savemsg.textContent = "Downloaded " + name + ".";
 }
 $("save-xml").addEventListener("click", () => save("xml"));
+$("save-pdf").addEventListener("click", () => save("pdf"));
 $("save-zip").addEventListener("click", () => save("zip"));
 $("copy").addEventListener("click", () => {
   if (!out || out.text === null) return;
