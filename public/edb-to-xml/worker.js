@@ -18,7 +18,7 @@ function boot() {
       const res = await fetch(LIB);
       if (!res.ok) throw new Error("Could not load the converter files.");
       pyodide.unpackArchive(await res.arrayBuffer(), "zip", { extractDir: "/lib" });
-      pyodide.runPython("import sys; sys.path.insert(0, '/lib'); import edb2xml");
+      pyodide.runPython("import sys; sys.path.insert(0, '/lib'); import edb2xml, heyex2hedx");
       pyodide.FS.mkdir("/in");
       pyodide.FS.mkdir("/out");
     })();
@@ -49,6 +49,67 @@ if ERR is None:
 shutil.rmtree("/out/images", ignore_errors=True)
 ERR
 `;
+
+/* Scan report: all Heidelberg files of a scan (or a whole export) together
+   -> one HEDX-style XML and one PDF per series. */
+const REPORT = `
+import json, zipfile, heyex2hedx
+ERR = None
+META = []
+try:
+    reports = heyex2hedx.build_all(list(PATHS))
+    if not reports:
+        ERR = "No scan series found in these files."
+    else:
+        with zipfile.ZipFile("/out/out.zip", "w", zipfile.ZIP_DEFLATED) as z:
+            for r in reports:
+                x = "/out/" + r["name"] + ".xml"
+                p = "/out/" + r["name"] + ".pdf"
+                with open(x, "w", encoding="utf-8", newline="\\n") as f:
+                    f.write(r["xml"])
+                with open(p, "wb") as f:
+                    f.write(heyex2hedx.pdf_bytes(r["xml"]))
+                z.write(x, arcname=r["name"] + ".xml")
+                z.write(p, arcname=r["name"] + ".pdf")
+                META.append({k: r[k] for k in ("series", "name", "notes", "images", "grid")})
+except Exception as exc:
+    ERR = f"{type(exc).__name__}: {exc}"
+json.dumps({"err": ERR, "meta": META})
+`;
+
+async function report(msg) {
+  postMessage({ type: "stage", stage: "engine" });
+  await boot();
+  postMessage({ type: "stage", stage: "convert" });
+
+  const FS = pyodide.FS;
+  const blobs = msg.files.map((f, i) => ({
+    name: i + "_" + (f.name || "input").replace(/[\/\\\0]/g, "_"), data: f.file }));
+  FS.mount(FS.filesystems.WORKERFS, { blobs }, "/in");
+  const written = [];
+  try {
+    pyodide.globals.set("PATHS", pyodide.toPy(blobs.map((b) => "/in/" + b.name)));
+    const res = JSON.parse(pyodide.runPython(REPORT));
+    if (res.err) {
+      postMessage({ type: "error", message: String(res.err).replace(/\/in\/\d+_/g, "") });
+      return;
+    }
+    const reports = res.meta.map((m) => {
+      written.push("/out/" + m.name + ".xml", "/out/" + m.name + ".pdf");
+      return Object.assign({}, m, {
+        xml: new Blob([FS.readFile("/out/" + m.name + ".xml")], { type: "text/plain" }),
+        pdf: new Blob([FS.readFile("/out/" + m.name + ".pdf")], { type: "application/pdf" }),
+      });
+    });
+    written.push("/out/out.zip");
+    postMessage({ type: "report", reports, zip: new Blob([FS.readFile("/out/out.zip")], { type: "application/zip" }) });
+  } finally {
+    for (const f of written.concat(["/out/out.zip"])) {
+      try { FS.unlink(f); } catch (e) { /* not written */ }
+    }
+    FS.unmount("/in");
+  }
+}
 
 async function convert(msg) {
   postMessage({ type: "stage", stage: "engine" });
@@ -89,7 +150,7 @@ async function convert(msg) {
 }
 
 self.onmessage = (e) => {
-  convert(e.data).catch((err) => {
+  (e.data.mode === "report" ? report(e.data) : convert(e.data)).catch((err) => {
     postMessage({ type: "error", message: (err && err.message) || String(err), engine: !pyodide });
   });
 };
